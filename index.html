@@ -678,8 +678,11 @@
   // ---- 各評価手法 ----
   // 取引事例比較法: 相場単価 × 面積 × 補正（築年・駅距離）
   function methodComparison(i) {
-    if (!isFinite(i.unitPrice) || !isFinite(i.area)) return null;
-    var base = i.unitPrice * i.area;
+    // 比較法で掛ける面積: マンションは専有面積、戸建・土地は土地面積
+    // （相場㎡単価が、マンション=専有面積あたり、戸建/土地=土地面積あたりのため）
+    var compArea = (i.ptype === "mansion") ? i.area : i.landArea;
+    if (!isFinite(i.unitPrice) || !isFinite(compArea)) return null;
+    var base = i.unitPrice * compArea;
 
     // 築年数補正（マンションは緩やか、木造戸建ては急）
     var ageAdj = 1;
@@ -725,9 +728,13 @@
   }
 
   // ---- 加重（物件種別で配分） ----
-  function weights(ptype) {
+  function weights(ptype, age) {
     if (ptype === "mansion") return { comparison: 0.55, income: 0.30, cost: 0.15 };
-    if (ptype === "house")   return { comparison: 0.50, income: 0.15, cost: 0.35 };
+    if (ptype === "house") {
+      // 新築に近いほど原価法を重視（中古取引の中央値は築古を含み新築を過小評価するため）
+      if (isFinite(age) && age <= 5) return { comparison: 0.35, income: 0.15, cost: 0.50 };
+      return { comparison: 0.50, income: 0.15, cost: 0.35 };
+    }
     return { comparison: 0.55, income: 0.05, cost: 0.40 }; // land
   }
 
@@ -766,7 +773,7 @@
       cost: methodCost(i)
     };
 
-    var w = weights(i.ptype);
+    var w = weights(i.ptype, i.age);
     var sum = 0, wsum = 0, active = [];
     ["comparison", "income", "cost"].forEach(function (k) {
       if (m[k] != null && isFinite(m[k]) && m[k] > 0) {
