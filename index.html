@@ -168,6 +168,19 @@
   .xspread.ok { background: var(--good-soft); color: var(--good); }
   .xspread.warn { background: var(--warn-soft); color: var(--warn); }
 
+  /* 地区別比較 */
+  .dist-cityline { font-size: 12px; color: var(--ink-soft); margin: 4px 0; }
+  .dist-cityline b { color: var(--ink); }
+  .dist-list { margin-top: 8px; max-height: 320px; overflow-y: auto; }
+  .dist-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 3px 4px; border-radius: 6px; }
+  .dist-row .dn { flex: 0 0 42%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dist-row .db { flex: 1; height: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .dist-row .dbf { display: block; height: 100%; background: var(--brand); border-radius: 999px; }
+  .dist-row .dv { flex: 0 0 auto; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .dist-row.target { background: var(--brand-soft); }
+  .dist-row.target .dn { font-weight: 800; color: var(--brand); }
+  .dist-row.target .dbf { background: var(--good); }
+
   /* Result */
   .result-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .verdict {
@@ -288,6 +301,9 @@
         <input type="text" id="addr" placeholder="住所（例：東京都港区赤坂1丁目）※公示地価の取得に使用" style="margin-top:8px" />
         <button type="button" id="fetchBtn" class="btn-fetch">📡 このエリアの相場を取得</button>
         <div id="fetchStatus" class="fetch-status"></div>
+        <button type="button" id="distBtn" class="btn-fetch" style="margin-top:8px">🏘️ 周辺地区の中古相場を比較</button>
+        <div id="distStatus" class="fetch-status"></div>
+        <div id="distPanel"></div>
       </div>
 
       <!-- 取引事例比較法 -->
@@ -637,6 +653,73 @@
       })
       .catch(function (e) { btn.disabled = false; setLcStatus("err", "取得できませんでした", String(e)); });
   });
+
+  // ---- 地区別 中古相場の比較 ----
+  function setDistStatus(cls, msg, detail) {
+    var el = $("distStatus");
+    el.className = "fetch-status " + (cls || "");
+    el.innerHTML = msg + (detail ? '<span class="detail">' + detail + "</span>" : "");
+  }
+  $("distBtn").addEventListener("click", function () {
+    if (!prefSel.value) { setDistStatus("err", "都道府県を選択してください"); return; }
+    if (!citySel.value) { setDistStatus("err", "市区町村を選択してください（地区比較には必須）"); return; }
+    var btn = $("distBtn"); btn.disabled = true;
+    setDistStatus("", "地区別の相場を集計中…");
+    fetch(apiUrl({ resource: "districts", area: prefSel.value, city: citySel.value, type: state.ptype }))
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        btn.disabled = false;
+        if (!res.ok) { setDistStatus("err", "取得に失敗しました", (res.j && (res.j.error || res.j.detail)) || ""); return; }
+        renderDistricts(res.j);
+      })
+      .catch(function (e) { btn.disabled = false; setDistStatus("err", "接続できませんでした", String(e)); });
+  });
+
+  function renderDistricts(data) {
+    var ds = data.districts || [];
+    if (!ds.length) {
+      setDistStatus("warn", "この種別の地区データが見つかりませんでした", "市区町村や物件種別を変えてお試しください");
+      $("distPanel").innerHTML = ""; return;
+    }
+    setDistStatus("", "");
+    var typeLabel = { mansion: "中古マンション", house: "中古戸建", land: "土地" }[data.type] || data.type;
+    var cityName = (citySel.options[citySel.selectedIndex] || {}).text || "";
+    var addr = ($("addr").value || "").trim();
+    var maxV = Math.max.apply(null, ds.map(function (x) { return x.median; }));
+
+    // 対象地区の推定（住所に含まれる地区名。最長一致を優先）
+    var target = null;
+    ds.forEach(function (d) {
+      if (d.name && addr && addr.indexOf(d.name) >= 0) {
+        if (!target || d.name.length > target.name.length) target = d;
+      }
+    });
+
+    var html = '<div class="dist-cityline">' + typeLabel + ' の地区別相場（' + data.year + '年・' + cityName +
+      '）／全体中央値 <b>' + (data.cityMedian != null ? data.cityMedian + '万/㎡' : '—') + '</b>（' + data.total + '件）</div>';
+    html += '<div class="dist-list">';
+    var shown = ds.slice(0, 25);
+    if (target && shown.indexOf(target) < 0) shown.push(target);
+    shown.forEach(function (d) {
+      var isT = target && d.name === target.name;
+      var w = maxV > 0 ? (d.median / maxV * 100) : 0;
+      html += '<div class="dist-row' + (isT ? ' target' : '') + '"><span class="dn">' + d.name +
+        (isT ? ' ← この住所' : '') + '</span><span class="db"><span class="dbf" style="width:' + w + '%"></span></span>' +
+        '<span class="dv">' + d.median + '万 (' + d.count + ')</span></div>';
+    });
+    html += '</div>';
+
+    if (target && data.cityMedian) {
+      var pct = Math.round((target.median - data.cityMedian) / data.cityMedian * 100);
+      var word = pct > 8 ? "高い（割高な地区）" : pct < -8 ? "安い（割安な地区）" : "ほぼ同水準";
+      html += '<div class="dist-cityline" style="margin-top:8px">📍「' + target.name + '」は全体中央値より <b>' +
+        (pct > 0 ? '+' : '') + pct + '%</b> ' + word + '（' + target.median + '万/㎡・' + target.count + '件）</div>';
+    } else if (addr) {
+      html += '<div class="dist-cityline" style="margin-top:8px">※住所から地区を自動特定できませんでした。上のリストで近い地区名をご確認ください。</div>';
+    }
+    html += '<div class="dist-cityline">※件数（かっこ内）が少ない地区は参考値です。</div>';
+    $("distPanel").innerHTML = html;
+  }
 
   // ---- 物件種別セグメント ----
   var typeBtns = $("ptype").querySelectorAll("button");
