@@ -1,3 +1,4 @@
+
 // 国土交通省「不動産情報ライブラリ」API を中継するサーバーレス関数。
 //
 // 目的:
@@ -75,6 +76,17 @@ function summarize(rows) {
       : { median: Math.round(med * 10) / 10, count: bucket[key].length };
   }
   return out;
+}
+
+// 1レコードから、指定種別の ㎡単価（万円/㎡）を返す（該当しなければ NaN）
+function unitForType(r, type) {
+  const t = r.Type || r.type;
+  if (!TYPE_MAP[type] || !TYPE_MAP[type].includes(t)) return NaN;
+  const price = toNum(r.TradePrice), area = toNum(r.Area), unit = toNum(r.UnitPrice);
+  let yen = NaN;
+  if (type === "land" && isFinite(unit) && unit > 0) yen = unit;
+  else if (isFinite(price) && isFinite(area) && area > 0) yen = price / area;
+  return (isFinite(yen) && yen > 0) ? yen / 10000 : NaN;
 }
 
 // 緯度経度 → Webメルカトルのタイル座標(x,y)
@@ -215,7 +227,39 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    res.status(400).json({ error: "unknown resource", allowed: ["cities", "price", "landprice"] });
+    // --- 地区別の中古相場（DistrictNameで集計） ---
+    if (resource === "districts") {
+      if (!q.area) { res.status(400).json({ error: "area(都道府県コード)が必要です" }); return; }
+      const now = new Date();
+      const year = q.year || String(now.getFullYear() - 1);
+      const type = q.type || "house";
+      const data = await callUpstream(EP_PRICE, {
+        year: year, area: q.area, city: q.city || undefined
+      }, key);
+      const rows = (data && data.data) ? data.data : [];
+      const byDist = {}, all = [];
+      for (const r of rows) {
+        const u = unitForType(r, type);
+        if (!isFinite(u)) continue;
+        all.push(u);
+        const d = r.DistrictName || r.districtName || "（地区不明）";
+        (byDist[d] = byDist[d] || []).push(u);
+      }
+      const districts = Object.keys(byDist).map(function (name) {
+        const m = median(byDist[name]);
+        return { name: name, median: Math.round(m * 10) / 10, count: byDist[name].length };
+      }).sort(function (a, b) { return b.median - a.median; });
+      const cityMed = median(all);
+      res.status(200).json({
+        status: "OK", area: q.area, city: q.city || null, year: year, type: type,
+        total: all.length,
+        cityMedian: cityMed == null ? null : Math.round(cityMed * 10) / 10,
+        districts: districts
+      });
+      return;
+    }
+
+    res.status(400).json({ error: "unknown resource", allowed: ["cities", "price", "landprice", "districts"] });
   } catch (e) {
     res.status(e.status || 502).json({
       error: "上流API呼び出しに失敗しました",
