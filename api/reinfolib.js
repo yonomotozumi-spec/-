@@ -16,7 +16,7 @@
 const BASE = "https://www.reinfolib.mlit.go.jp/ex-api/external";
 const EP_PRICE = "/XIT001";     // 不動産価格（取引価格・成約価格）情報取得API
 const EP_CITIES = "/XIT002";    // 都道府県内市区町村一覧取得API
-const EP_LANDPRICE = "/XPT001"; // 地価公示・地価調査のポイント情報取得API（GISタイル）
+const EP_LANDPRICE = "/XPT002"; // 地価公示・地価調査のポイント情報取得API（GISタイル）
 const KEY_HEADER = "Ocp-Apim-Subscription-Key";
 
 // 種別ごとの「Type」対応（不動産情報ライブラリの種類区分）
@@ -183,21 +183,33 @@ module.exports = async function handler(req, res) {
       }
       const now = new Date();
       const year = q.year || String(now.getFullYear());
-      const zoom = q.zoom ? parseInt(q.zoom, 10) : 14; // 地価公示点が拾える程度の広さ
-      const t = deg2tile(lat, lon, zoom);
-      const data = await callUpstream(EP_LANDPRICE, {
-        response_format: "geojson", z: zoom, x: t.x, y: t.y, year: year
-      }, key);
-      const feats = (data && data.features) ? data.features : [];
-      const prices = [];
-      for (const f of feats) {
-        const p = pickLandPrice(f && f.properties);
-        if (isFinite(p) && p > 0) prices.push(p / 10000); // 円/㎡ → 万円/㎡
+      const zoom = q.zoom ? parseInt(q.zoom, 10) : 14;
+      const c = deg2tile(lat, lon, zoom);
+      // 地価公示の地点はまばらなので、中心＋周囲8タイル(3×3)を収集
+      const tiles = [];
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) tiles.push({ x: c.x + dx, y: c.y + dy });
       }
+      const prices = [];
+      let firstErr = null;
+      await Promise.all(tiles.map(async function (t) {
+        try {
+          const data = await callUpstream(EP_LANDPRICE, {
+            response_format: "geojson", z: zoom, x: t.x, y: t.y, year: year
+          }, key);
+          const feats = (data && data.features) ? data.features : [];
+          for (const f of feats) {
+            const p = pickLandPrice(f && f.properties);
+            if (isFinite(p) && p > 0) prices.push(p / 10000); // 円/㎡ → 万円/㎡
+          }
+        } catch (e) { if (!firstErr) firstErr = e; }
+      }));
+      // 全タイルが上流エラーで、かつ1件も取れなければエラーとして報告
+      if (!prices.length && firstErr) throw firstErr;
       const med = median(prices);
       res.status(200).json({
         status: "OK", lat: lat, lon: lon, year: year, zoom: zoom,
-        tile: t, count: prices.length,
+        center: c, count: prices.length,
         median: med == null ? null : Math.round(med * 10) / 10
       });
       return;
