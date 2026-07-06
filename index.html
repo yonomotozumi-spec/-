@@ -200,6 +200,19 @@
   .compare-row { display: flex; justify-content: space-between; font-size: 13.5px; padding: 3px 0; }
   .compare-row b { font-variant-numeric: tabular-nums; }
 
+  /* 価格目安ライン（SUUMO照合用） */
+  .pl-title { font-size: 12.5px; color: var(--ink-soft); margin: 16px 0 6px; font-weight: 600; }
+  .pricelines { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+  .pl-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; font-size: 13px; }
+  .pl-row + .pl-row { border-top: 1px solid var(--line); }
+  .pl-row .pl-lab { font-weight: 700; }
+  .pl-row .pl-val { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .pl-row.good { background: var(--good-soft); color: var(--good); }
+  .pl-row.ok   { background: var(--panel-2); color: var(--ink); }
+  .pl-row.warn { background: var(--warn-soft); color: var(--warn); }
+  .pl-row.bad  { background: var(--bad-soft); color: var(--bad); }
+  .pl-hint { font-size: 11.5px; color: var(--ink-soft); margin-top: 6px; }
+
   /* gauge */
   .gauge { margin: 14px 0 6px; }
   .gauge-track { position: relative; height: 12px; border-radius: 999px; overflow: hidden;
@@ -268,12 +281,12 @@
       <div class="inline">
         <div class="field" id="fld-area">
           <label>専有／建物面積</label>
-          <input type="number" id="area" placeholder="例）65" min="0" step="1" inputmode="decimal" />
+          <input type="number" id="area" placeholder="例）65" min="0" step="any" inputmode="decimal" />
           <span class="unit">㎡</span>
         </div>
         <div class="field" id="fld-land">
           <label>土地面積</label>
-          <input type="number" id="landArea" placeholder="例）110" min="0" step="1" inputmode="decimal" />
+          <input type="number" id="landArea" placeholder="例）110" min="0" step="any" inputmode="decimal" />
           <span class="unit">㎡</span>
         </div>
       </div>
@@ -311,7 +324,7 @@
         <label>エリア相場単価 <span class="hint">（自動取得 or 手入力）</span></label>
         <select id="areaPreset"></select>
         <div style="margin-top:8px; position:relative">
-          <input type="number" id="unitPrice" placeholder="相場単価を直接入力" min="0" step="1" inputmode="numeric" />
+          <input type="number" id="unitPrice" placeholder="相場単価を直接入力" min="0" step="any" inputmode="decimal" />
           <span class="unit">万円 / ㎡</span>
         </div>
       </div>
@@ -329,7 +342,7 @@
           </div>
           <div>
             <span class="lc-lab">路線価 <span class="hint">千円/㎡</span></span>
-            <input type="number" id="rosenka" step="1" min="0" placeholder="国税庁で確認" inputmode="numeric" />
+            <input type="number" id="rosenka" step="any" min="0" placeholder="国税庁で確認" inputmode="decimal" />
           </div>
           <div>
             <span class="lc-lab">固定資産税評価 <span class="hint">土地 万円/㎡</span></span>
@@ -376,7 +389,7 @@
         <div class="body">
           <div class="field">
             <label>土地単価 <span class="hint">（路線価/公示地価など）</span></label>
-            <input type="number" id="landUnit" placeholder="例）30" min="0" step="1" inputmode="numeric" />
+            <input type="number" id="landUnit" placeholder="例）30" min="0" step="any" inputmode="decimal" />
             <span class="unit">万円 / ㎡</span>
           </div>
           <div class="field">
@@ -899,6 +912,17 @@
       html += '<div class="verdict ' + vd.k + '"><span class="dot"></span>' + vd.t + '</div>';
     }
     html += '</div>';
+
+    // 価格目安ライン（SUUMO等の売出価格と即比較するための境界金額）
+    var t090 = est * 0.90, t110 = est * 1.10, t125 = est * 1.25;
+    html += '<div class="pl-title">🔎 SUUMO等で探すときの価格目安（この推定に対して）</div>';
+    html += '<div class="pricelines">';
+    html += '<div class="pl-row good"><span class="pl-lab">🟢 割安（買い得ライン）</span><span class="pl-val">' + fmtManRaw(t090) + ' 万円 以下</span></div>';
+    html += '<div class="pl-row ok"><span class="pl-lab">⚪ 適正</span><span class="pl-val">' + fmtManRaw(t090) + ' 〜 ' + fmtManRaw(t110) + ' 万円</span></div>';
+    html += '<div class="pl-row warn"><span class="pl-lab">🟠 やや割高</span><span class="pl-val">' + fmtManRaw(t110) + ' 〜 ' + fmtManRaw(t125) + ' 万円</span></div>';
+    html += '<div class="pl-row bad"><span class="pl-lab">🔴 割高</span><span class="pl-val">' + fmtManRaw(t125) + ' 万円 超</span></div>';
+    html += '</div>';
+    html += '<div class="pl-hint">※ 同条件（面積・築年・エリア）の物件の売出価格を、この表と見比べてください。<b>' + fmtManRaw(t090) + ' 万円以下なら割安</b>の目安です。</div>';
 
     // 検討価格との比較
     if (hasTarget) {
