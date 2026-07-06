@@ -1,0 +1,906 @@
+<!-- 不動産 適正価値 診断アプリ -->
+<title>不動産 適正価値 診断</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --panel-2: #fafbfc;
+    --ink: #1a1d21;
+    --ink-soft: #5b6570;
+    --line: #e3e7ec;
+    --brand: #2563eb;
+    --brand-soft: #eaf1ff;
+    --good: #16a34a;
+    --good-soft: #e7f6ec;
+    --warn: #d97706;
+    --warn-soft: #fdf1e0;
+    --bad: #dc2626;
+    --bad-soft: #fdeaea;
+    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.06);
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116;
+      --panel: #171b22;
+      --panel-2: #1d222b;
+      --ink: #e8ebf0;
+      --ink-soft: #98a2b0;
+      --line: #2a313c;
+      --brand: #5b8cff;
+      --brand-soft: #1a2436;
+      --good: #4ade80;
+      --good-soft: #16261c;
+      --warn: #fbbf24;
+      --warn-soft: #2a2010;
+      --bad: #f87171;
+      --bad-soft: #2a1616;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f5f6f8;--panel:#fff;--panel-2:#fafbfc;--ink:#1a1d21;--ink-soft:#5b6570;--line:#e3e7ec;
+    --brand:#2563eb;--brand-soft:#eaf1ff;--good:#16a34a;--good-soft:#e7f6ec;--warn:#d97706;
+    --warn-soft:#fdf1e0;--bad:#dc2626;--bad-soft:#fdeaea;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg:#0e1116;--panel:#171b22;--panel-2:#1d222b;--ink:#e8ebf0;--ink-soft:#98a2b0;--line:#2a313c;
+    --brand:#5b8cff;--brand-soft:#1a2436;--good:#4ade80;--good-soft:#16261c;--warn:#fbbf24;
+    --warn-soft:#2a2010;--bad:#f87171;--bad-soft:#2a1616;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 18px 72px; }
+
+  header.hero { margin-bottom: 22px; }
+  .hero h1 { font-size: clamp(22px, 3.2vw, 30px); margin: 0 0 6px; letter-spacing: .01em; }
+  .hero p { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
+  .hero .tag {
+    display:inline-block; font-size:12px; font-weight:600; color:var(--brand);
+    background:var(--brand-soft); padding:3px 10px; border-radius:999px; margin-bottom:10px;
+  }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  @media (min-width: 860px) { .grid { grid-template-columns: 400px 1fr; align-items: start; } }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+  .card h2 { font-size: 15px; margin: 0 0 4px; }
+  .card .sub { color: var(--ink-soft); font-size: 12.5px; margin: 0 0 16px; }
+
+  .field { margin-bottom: 14px; }
+  .field > label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .field .hint { font-size: 11.5px; color: var(--ink-soft); font-weight: 400; }
+  .field .unit { color: var(--ink-soft); font-size: 12px; }
+
+  input, select {
+    width: 100%; padding: 9px 11px; font-size: 14px; color: var(--ink);
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px;
+    font-family: inherit; transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, select:focus {
+    outline: none; border-color: var(--brand);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent);
+  }
+  .inline { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button {
+    flex: 1 1 auto; padding: 8px 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+    background: var(--panel-2); color: var(--ink-soft); border: 1px solid var(--line);
+    border-radius: 9px; font-family: inherit; transition: all .12s;
+  }
+  .seg button.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+  details.adv { margin-top: 4px; border-top: 1px solid var(--line); padding-top: 12px; }
+  details.adv > summary {
+    cursor: pointer; font-size: 13px; font-weight: 600; color: var(--brand);
+    list-style: none; user-select: none;
+  }
+  details.adv > summary::-webkit-details-marker { display: none; }
+  details.adv > summary::before { content: "▸ "; }
+  details.adv[open] > summary::before { content: "▾ "; }
+  details.adv .body { padding-top: 12px; }
+
+  .btn-primary {
+    width: 100%; padding: 12px; margin-top: 6px; font-size: 15px; font-weight: 700;
+    color: #fff; background: var(--brand); border: none; border-radius: 10px; cursor: pointer;
+    font-family: inherit; transition: filter .15s;
+  }
+  .btn-primary:hover { filter: brightness(1.06); }
+
+  /* 自動取得ブロック */
+  .autobox { background: var(--brand-soft); border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent); border-radius: 12px; padding: 14px; }
+  .autobox > label { color: var(--brand); }
+  .btn-fetch {
+    width: 100%; margin-top: 10px; padding: 10px; font-size: 14px; font-weight: 700; cursor: pointer;
+    color: var(--brand); background: var(--panel); border: 1px solid var(--brand); border-radius: 9px; font-family: inherit;
+    transition: background .15s, color .15s;
+  }
+  .btn-fetch:hover:not(:disabled) { background: var(--brand); color: #fff; }
+  .btn-fetch:disabled { opacity: .6; cursor: progress; }
+  .fetch-status { margin-top: 9px; font-size: 12px; line-height: 1.5; min-height: 1px; }
+  .fetch-status.ok { color: var(--good); }
+  .fetch-status.warn { color: var(--warn); }
+  .fetch-status.err { color: var(--bad); }
+  .fetch-status .detail { color: var(--ink-soft); display: block; margin-top: 2px; }
+
+  /* 土地クロスチェック */
+  .landcheck { background: var(--panel-2); border: 1px dashed var(--line); border-radius: 12px; padding: 14px; }
+  .lc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  .lc-lab { display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+  .lc-in { display: flex; gap: 6px; }
+  .lc-in input { flex: 1; }
+  .lc-btn { flex: 0 0 auto; padding: 0 10px; font-size: 12px; font-weight: 700; color: var(--brand);
+    background: var(--panel); border: 1px solid var(--brand); border-radius: 8px; cursor: pointer; font-family: inherit; }
+  .lc-btn:hover:not(:disabled) { background: var(--brand); color: #fff; }
+  .lc-btn:disabled { opacity: .6; cursor: progress; }
+  .lc-links { margin-top: 10px; font-size: 11.5px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .lc-links a { color: var(--brand); text-decoration: none; }
+  .lc-links a:hover { text-decoration: underline; }
+  .lc-adopt { margin-top: 9px; font-size: 12.5px; }
+  .lc-adopt b { color: var(--brand); }
+
+  /* クロスチェック結果パネル */
+  .xcheck { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--line); }
+  .xcheck h3 { font-size: 13px; margin: 0 0 10px; }
+  .xrow { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; padding: 4px 0; border-bottom: 1px dotted var(--line); }
+  .xrow:last-of-type { border-bottom: none; }
+  .xrow .xsrc { color: var(--ink-soft); }
+  .xrow .xsrc .conv { font-size: 11px; }
+  .xrow .xval { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .xspread { margin-top: 10px; font-size: 12.5px; padding: 8px 10px; border-radius: 8px; }
+  .xspread.ok { background: var(--good-soft); color: var(--good); }
+  .xspread.warn { background: var(--warn-soft); color: var(--warn); }
+
+  /* Result */
+  .result-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .verdict {
+    display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px;
+    padding: 6px 14px; border-radius: 999px;
+  }
+  .verdict.good { background: var(--good-soft); color: var(--good); }
+  .verdict.warn { background: var(--warn-soft); color: var(--warn); }
+  .verdict.bad  { background: var(--bad-soft);  color: var(--bad); }
+  .verdict .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+
+  .est-num { font-size: clamp(28px, 5vw, 40px); font-weight: 800; letter-spacing: .01em; margin: 10px 0 2px; }
+  .est-num small { font-size: 15px; font-weight: 600; color: var(--ink-soft); margin-left: 4px; }
+  .est-range { color: var(--ink-soft); font-size: 13px; }
+
+  .compare-box { margin: 18px 0; padding: 14px 16px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--line); }
+  .compare-row { display: flex; justify-content: space-between; font-size: 13.5px; padding: 3px 0; }
+  .compare-row b { font-variant-numeric: tabular-nums; }
+
+  /* gauge */
+  .gauge { margin: 14px 0 6px; }
+  .gauge-track { position: relative; height: 12px; border-radius: 999px; overflow: hidden;
+    background: linear-gradient(90deg, var(--good) 0%, var(--good) 30%, var(--warn) 30%, var(--warn) 62%, var(--bad) 62%, var(--bad) 100%); opacity:.85; }
+  .gauge-mark { position: absolute; top: -5px; width: 3px; height: 22px; background: var(--ink); border-radius: 2px; transform: translateX(-50%); box-shadow: 0 0 0 2px var(--panel); transition: left .4s cubic-bezier(.2,.7,.2,1); }
+  .gauge-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-soft); margin-top: 8px; }
+
+  .methods { margin-top: 20px; }
+  .methods h3 { font-size: 13px; margin: 0 0 10px; color: var(--ink-soft); text-transform: none; }
+  .mrow { margin-bottom: 12px; }
+  .mrow .mtop { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; margin-bottom: 4px; }
+  .mrow .mtop .mname { font-weight: 600; }
+  .mrow .mtop .mname span { font-weight: 400; color: var(--ink-soft); font-size: 11.5px; margin-left:6px;}
+  .mrow .mtop .mval { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .mrow .mtop .mval.off { color: var(--ink-soft); font-weight: 500; font-size: 12px; }
+  .bar-track { height: 8px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--brand); border-radius: 999px; transition: width .5s cubic-bezier(.2,.7,.2,1); }
+  .weight-pill { font-size: 10.5px; color: var(--ink-soft); background: var(--panel-2); border:1px solid var(--line); padding: 1px 7px; border-radius: 999px; margin-left: 6px; }
+
+  .notes { margin-top: 18px; font-size: 12px; color: var(--ink-soft); }
+  .notes ul { margin: 6px 0 0; padding-left: 18px; }
+  .placeholder { color: var(--ink-soft); text-align: center; padding: 40px 10px; font-size: 14px; }
+  .placeholder .big { font-size: 40px; display:block; margin-bottom:10px; opacity:.6;}
+
+  .toolbar { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+  .toolbar button { font-size: 12px; padding: 5px 11px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink-soft); cursor: pointer; font-family: inherit; font-weight:600; }
+  .toolbar button:hover { color: var(--ink); }
+  .disclaimer { margin-top: 26px; font-size: 11.5px; color: var(--ink-soft); text-align:center; line-height:1.7; }
+</style>
+
+<div class="wrap">
+  <div class="toolbar">
+    <button id="themeBtn" type="button">🌓 表示切替</button>
+  </div>
+
+  <header class="hero">
+    <span class="tag">不動産 適正価値 診断</span>
+    <h1>その価格、資産価値として妥当ですか？</h1>
+    <p>物件情報を入力すると、鑑定評価の3手法（取引事例比較法・収益還元法・原価法）から推定適正価値を算出し、検討中の価格が割安か割高かを判定します。</p>
+  </header>
+
+  <div class="grid">
+    <!-- ============ INPUT ============ -->
+    <form class="card" id="form" autocomplete="off">
+      <h2>物件情報を入力</h2>
+      <p class="sub">分かる範囲で入力してください。空欄はその手法を除外して評価します。</p>
+
+      <div class="field">
+        <label>物件種別</label>
+        <div class="seg" id="ptype">
+          <button type="button" data-v="mansion" class="active">マンション</button>
+          <button type="button" data-v="house">戸建て</button>
+          <button type="button" data-v="land">土地</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>検討中の価格 <span class="hint">（提示・購入検討価格）</span></label>
+        <div style="position:relative">
+          <input type="number" id="targetPrice" placeholder="例）4800" min="0" step="10" inputmode="numeric" />
+        </div>
+        <span class="unit">万円</span>
+      </div>
+
+      <div class="inline">
+        <div class="field" id="fld-area">
+          <label>専有／建物面積</label>
+          <input type="number" id="area" placeholder="例）65" min="0" step="1" inputmode="decimal" />
+          <span class="unit">㎡</span>
+        </div>
+        <div class="field" id="fld-land">
+          <label>土地面積</label>
+          <input type="number" id="landArea" placeholder="例）110" min="0" step="1" inputmode="decimal" />
+          <span class="unit">㎡</span>
+        </div>
+      </div>
+
+      <div class="inline">
+        <div class="field" id="fld-age">
+          <label>築年数</label>
+          <input type="number" id="age" placeholder="例）15" min="0" step="1" inputmode="numeric" />
+          <span class="unit">年</span>
+        </div>
+        <div class="field">
+          <label>最寄駅 徒歩</label>
+          <input type="number" id="walk" placeholder="例）8" min="0" step="1" inputmode="numeric" />
+          <span class="unit">分</span>
+        </div>
+      </div>
+
+      <!-- 住所から自動取得（国交省 不動産情報ライブラリ） -->
+      <div class="field autobox">
+        <label>住所から相場を自動取得 <span class="hint">（国交省の不動産取引データ）</span></label>
+        <div class="inline">
+          <select id="pref"></select>
+          <select id="city"><option value="">市区町村（任意）</option></select>
+        </div>
+        <input type="text" id="addr" placeholder="住所（例：東京都港区赤坂1丁目）※公示地価の取得に使用" style="margin-top:8px" />
+        <button type="button" id="fetchBtn" class="btn-fetch">📡 このエリアの相場を取得</button>
+        <div id="fetchStatus" class="fetch-status"></div>
+      </div>
+
+      <!-- 取引事例比較法 -->
+      <div class="field">
+        <label>エリア相場単価 <span class="hint">（自動取得 or 手入力）</span></label>
+        <select id="areaPreset"></select>
+        <div style="margin-top:8px; position:relative">
+          <input type="number" id="unitPrice" placeholder="相場単価を直接入力" min="0" step="1" inputmode="numeric" />
+          <span class="unit">万円 / ㎡</span>
+        </div>
+      </div>
+
+      <!-- 土地価格のクロスチェック -->
+      <div class="field landcheck">
+        <label>土地価格のクロスチェック <span class="hint">（公示地価・路線価・固評で確認）</span></label>
+        <div class="lc-grid">
+          <div>
+            <span class="lc-lab">公示地価 <span class="hint">万円/㎡</span></span>
+            <div class="lc-in">
+              <input type="number" id="koji" step="0.1" min="0" placeholder="—" inputmode="decimal" />
+              <button type="button" id="kojiBtn" class="lc-btn">取得</button>
+            </div>
+          </div>
+          <div>
+            <span class="lc-lab">路線価 <span class="hint">千円/㎡</span></span>
+            <input type="number" id="rosenka" step="1" min="0" placeholder="国税庁で確認" inputmode="numeric" />
+          </div>
+          <div>
+            <span class="lc-lab">固定資産税評価 <span class="hint">土地 万円/㎡</span></span>
+            <input type="number" id="kotei" step="0.1" min="0" placeholder="課税明細より" inputmode="decimal" />
+          </div>
+          <div>
+            <span class="lc-lab">市場係数 <span class="hint">実勢÷公示</span></span>
+            <input type="number" id="mktFactor" step="0.05" min="0.5" max="2" value="1.0" inputmode="decimal" />
+          </div>
+        </div>
+        <div class="lc-links">
+          <a href="https://www.rosenka.nta.go.jp/" target="_blank" rel="noopener">↗ 路線価図（国税庁）</a>
+          <a href="https://www.land.mlit.go.jp/landPrice/" target="_blank" rel="noopener">↗ 地価公示・地価調査</a>
+        </div>
+        <div id="lcAdopt" class="lc-adopt"></div>
+        <div id="lcStatus" class="fetch-status"></div>
+      </div>
+
+      <details class="adv">
+        <summary>収益還元法の条件（投資／賃貸を想定する場合）</summary>
+        <div class="body">
+          <div class="field">
+            <label>想定 月額賃料</label>
+            <input type="number" id="rent" placeholder="例）15" min="0" step="0.5" inputmode="decimal" />
+            <span class="unit">万円 / 月</span>
+          </div>
+          <div class="inline">
+            <div class="field">
+              <label>還元利回り <span class="hint">(cap rate)</span></label>
+              <input type="number" id="capRate" value="4.5" min="0.1" step="0.1" inputmode="decimal" />
+              <span class="unit">%</span>
+            </div>
+            <div class="field">
+              <label>空室・経費率</label>
+              <input type="number" id="expenseRate" value="20" min="0" max="90" step="1" inputmode="numeric" />
+              <span class="unit">%</span>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="adv">
+        <summary>原価法の条件（土地・建物の内訳を細かく見る場合）</summary>
+        <div class="body">
+          <div class="field">
+            <label>土地単価 <span class="hint">（路線価/公示地価など）</span></label>
+            <input type="number" id="landUnit" placeholder="例）30" min="0" step="1" inputmode="numeric" />
+            <span class="unit">万円 / ㎡</span>
+          </div>
+          <div class="field">
+            <label>建物構造</label>
+            <select id="structure">
+              <option value="rc">RC・SRC（マンション等）</option>
+              <option value="steel">鉄骨造</option>
+              <option value="wood">木造（戸建て等）</option>
+            </select>
+          </div>
+        </div>
+      </details>
+
+      <details class="adv">
+        <summary>データ取得の接続設定</summary>
+        <div class="body">
+          <div class="field">
+            <label>中継API のURL <span class="hint">（自動取得の接続先）</span></label>
+            <input type="text" id="apiBase" value="/api/reinfolib" placeholder="/api/reinfolib" />
+            <span class="hint">ローカルの index.html から使う場合は、デプロイ済みの絶対URL（例: https://your-app.vercel.app/api/reinfolib）を入力してください。</span>
+          </div>
+        </div>
+      </details>
+
+      <button type="submit" class="btn-primary">適正価値を診断する</button>
+    </form>
+
+    <!-- ============ RESULT ============ -->
+    <section class="card" id="result">
+      <div class="placeholder" id="placeholder">
+        <span class="big">🏠</span>
+        物件情報を入力して「適正価値を診断する」を押すと、<br>推定適正価値と判定がここに表示されます。
+      </div>
+      <div id="output" hidden></div>
+    </section>
+  </div>
+
+  <p class="disclaimer">
+    本アプリの算出結果は、入力値と一般的な評価モデルに基づく<b>簡易的な推定</b>です。実際の市場価格・担保評価・鑑定評価額とは異なります。<br>
+    重要な意思決定の際は、不動産会社の査定や不動産鑑定士による正式な評価をご利用ください。
+  </p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- エリア相場プリセット（マンション中古 参考単価 / 万円 per ㎡, 概算） ----
+  var PRESETS = [
+    { label: "相場単価を選択（任意）", v: "" },
+    { label: "東京都心（港区・渋谷区など）", v: 180 },
+    { label: "東京23区 平均", v: 110 },
+    { label: "東京都下・横浜中心部", v: 75 },
+    { label: "大阪市中心部", v: 70 },
+    { label: "名古屋市中心部", v: 58 },
+    { label: "福岡市中心部", v: 55 },
+    { label: "札幌市中心部", v: 45 },
+    { label: "地方中核都市 平均", v: 38 },
+    { label: "地方郊外", v: 22 }
+  ];
+
+  // 建物 再調達原価（円換算 万円/㎡）と 法定耐用年数
+  var STRUCT = {
+    rc:    { cost: 25, life: 47, label: "RC・SRC" },
+    steel: { cost: 20, life: 34, label: "鉄骨造" },
+    wood:  { cost: 18, life: 22, label: "木造" }
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { ptype: "mansion", marketLand: null };
+
+  // ---- テーマ切替 ----
+  $("themeBtn").addEventListener("click", function () {
+    var root = document.documentElement;
+    var cur = root.getAttribute("data-theme");
+    var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = cur ? (cur === "dark" ? "light" : "dark") : (dark ? "light" : "dark");
+    root.setAttribute("data-theme", next);
+  });
+
+  // ---- プリセット描画 ----
+  var sel = $("areaPreset");
+  PRESETS.forEach(function (p) {
+    var o = document.createElement("option");
+    o.value = p.v; o.textContent = p.label;
+    sel.appendChild(o);
+  });
+  sel.addEventListener("change", function () {
+    if (sel.value) $("unitPrice").value = sel.value;
+  });
+
+  // ---- 都道府県（コード → 名称） ----
+  var PREFS = [
+    ["01","北海道"],["02","青森県"],["03","岩手県"],["04","宮城県"],["05","秋田県"],
+    ["06","山形県"],["07","福島県"],["08","茨城県"],["09","栃木県"],["10","群馬県"],
+    ["11","埼玉県"],["12","千葉県"],["13","東京都"],["14","神奈川県"],["15","新潟県"],
+    ["16","富山県"],["17","石川県"],["18","福井県"],["19","山梨県"],["20","長野県"],
+    ["21","岐阜県"],["22","静岡県"],["23","愛知県"],["24","三重県"],["25","滋賀県"],
+    ["26","京都府"],["27","大阪府"],["28","兵庫県"],["29","奈良県"],["30","和歌山県"],
+    ["31","鳥取県"],["32","島根県"],["33","岡山県"],["34","広島県"],["35","山口県"],
+    ["36","徳島県"],["37","香川県"],["38","愛媛県"],["39","高知県"],["40","福岡県"],
+    ["41","佐賀県"],["42","長崎県"],["43","熊本県"],["44","大分県"],["45","宮崎県"],
+    ["46","鹿児島県"],["47","沖縄県"]
+  ];
+  var prefSel = $("pref"), citySel = $("city"), fetchBtn = $("fetchBtn"), fStatus = $("fetchStatus");
+  (function () {
+    var o0 = document.createElement("option");
+    o0.value = ""; o0.textContent = "都道府県を選択";
+    prefSel.appendChild(o0);
+    PREFS.forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p[0]; o.textContent = p[1];
+      prefSel.appendChild(o);
+    });
+  })();
+
+  function apiUrl(params) {
+    var base = ($("apiBase").value || "/api/reinfolib").trim();
+    var qs = Object.keys(params).filter(function (k) { return params[k] != null && params[k] !== ""; })
+      .map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); }).join("&");
+    return base + (base.indexOf("?") >= 0 ? "&" : "?") + qs;
+  }
+  function setStatus(cls, msg, detail) {
+    fStatus.className = "fetch-status " + (cls || "");
+    fStatus.innerHTML = msg + (detail ? '<span class="detail">' + detail + "</span>" : "");
+  }
+
+  // 都道府県変更 → 市区町村一覧を取得
+  prefSel.addEventListener("change", function () {
+    citySel.innerHTML = '<option value="">市区町村（任意）</option>';
+    if (!prefSel.value) return;
+    setStatus("", "市区町村を取得中…");
+    fetch(apiUrl({ resource: "cities", area: prefSel.value }))
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) { setStatus("warn", "市区町村の取得に失敗（都道府県のみで取得可）", res.j && (res.j.error || res.j.detail)); return; }
+        (res.j.cities || []).forEach(function (c) {
+          if (!c.id) return;
+          var o = document.createElement("option");
+          o.value = c.id; o.textContent = c.name;
+          citySel.appendChild(o);
+        });
+        setStatus("", "");
+      })
+      .catch(function (e) { setStatus("warn", "市区町村の取得をスキップ（都道府県のみで取得可）", String(e)); });
+  });
+
+  // 相場を取得
+  fetchBtn.addEventListener("click", function () {
+    if (!prefSel.value) { setStatus("err", "都道府県を選択してください"); return; }
+    fetchBtn.disabled = true;
+    setStatus("", "国交省データから相場を取得中…");
+    fetch(apiUrl({ resource: "price", area: prefSel.value, city: citySel.value }))
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        fetchBtn.disabled = false;
+        if (!res.ok) {
+          setStatus("err", "取得に失敗しました", (res.j && (res.j.error || "")) + " " + (res.j && res.j.detail ? JSON.stringify(res.j.detail).slice(0, 160) : ""));
+          return;
+        }
+        applyMarketData(res.j);
+      })
+      .catch(function (e) {
+        fetchBtn.disabled = false;
+        setStatus("err", "接続できませんでした", "中継APIのURL・デプロイ状況をご確認ください（" + String(e) + "）");
+      });
+  });
+
+  // 取得結果を入力欄へ反映
+  function applyMarketData(data) {
+    var r = data.results || {};
+    state.marketLand = (r.land && r.land.median) ? r.land.median : null;
+    var t = state.ptype;
+    var loc = (PREFS.filter(function (p) { return p[0] === data.area; })[0] || ["", ""])[1];
+    var applied = [];
+
+    function fill(id, val) { if (val != null) { $(id).value = val; applied.push(id); } }
+
+    if (t === "mansion") {
+      if (r.mansion && r.mansion.median) fill("unitPrice", r.mansion.median);
+    } else if (t === "land") {
+      if (r.land && r.land.median) { fill("unitPrice", r.land.median); fill("landUnit", r.land.median); }
+    } else { // house
+      if (r.house && r.house.median) fill("unitPrice", r.house.median);
+      if (r.land && r.land.median) fill("landUnit", r.land.median);
+    }
+
+    var parts = [];
+    if (r.mansion && r.mansion.count) parts.push("中古マンション " + r.mansion.median + "万/㎡(" + r.mansion.count + "件)");
+    if (r.house && r.house.count) parts.push("戸建 " + r.house.median + "万/㎡(" + r.house.count + "件)");
+    if (r.land && r.land.count) parts.push("土地 " + r.land.median + "万/㎡(" + r.land.count + "件)");
+
+    if (applied.length) {
+      setStatus("ok", "✓ " + loc + " の相場を反映しました（" + data.year + "年・" + data.total + "件から集計）", parts.join(" / "));
+    } else if (parts.length) {
+      setStatus("warn", "この種別に一致する取引が見つかりませんでした", parts.join(" / ") + "（他種別は取得済み）");
+    } else {
+      setStatus("warn", "該当エリアの取引データが見つかりませんでした", loc + " " + data.year + "年 / 市区町村を絞る・期間を変える等をお試しください");
+    }
+    refreshLandCheck();
+  }
+
+  // ---- 土地価格クロスチェック ----
+  var landUnitAuto = false;
+  $("landUnit").addEventListener("input", function () { landUnitAuto = false; });
+
+  function mktFactor() {
+    var f = parseFloat($("mktFactor").value);
+    return isFinite(f) && f > 0 ? f : 1.0;
+  }
+
+  // 各公的指標 → 想定実勢 土地単価（万円/㎡）
+  function landEstimates() {
+    var f = mktFactor(), out = [];
+    var koji = num("koji");
+    if (isFinite(koji)) out.push({ src: "公示地価", conv: "×" + f.toFixed(2), val: koji * f });
+    var rosenka = num("rosenka");
+    if (isFinite(rosenka)) out.push({ src: "路線価", conv: "÷10÷0.8×" + f.toFixed(2), val: rosenka / 10 / 0.8 * f });
+    var kotei = num("kotei");
+    if (isFinite(kotei)) out.push({ src: "固定資産税評価", conv: "÷0.7×" + f.toFixed(2), val: kotei / 0.7 * f });
+    if (state.marketLand) out.push({ src: "取引相場", conv: "実勢", val: state.marketLand });
+    return out;
+  }
+  function adoptedLandUnit() {
+    var e = landEstimates();
+    if (!e.length) return null;
+    var v = e.map(function (x) { return x.val; }).sort(function (a, b) { return a - b; });
+    var m = Math.floor(v.length / 2);
+    return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
+  }
+  function refreshLandCheck() {
+    var e = landEstimates(), adopt = adoptedLandUnit();
+    if (adopt == null) { $("lcAdopt").innerHTML = ""; return; }
+    var a = Math.round(adopt * 10) / 10;
+    $("lcAdopt").innerHTML = "採用 土地単価: <b>" + a + " 万円/㎡</b>（" + e.length + "指標の中央値）";
+    if (landUnitAuto || !$("landUnit").value) { $("landUnit").value = a; landUnitAuto = true; }
+    if (state.ptype === "land" && !$("unitPrice").value) { $("unitPrice").value = a; }
+  }
+  ["koji", "rosenka", "kotei", "mktFactor"].forEach(function (id) {
+    $(id).addEventListener("input", refreshLandCheck);
+  });
+
+  function setLcStatus(cls, msg, detail) {
+    var el = $("lcStatus");
+    el.className = "fetch-status " + (cls || "");
+    el.innerHTML = msg + (detail ? '<span class="detail">' + detail + "</span>" : "");
+  }
+
+  // 公示地価の取得（住所 → 国土地理院ジオコーディング → 中継API）
+  $("kojiBtn").addEventListener("click", function () {
+    var addr = ($("addr").value || "").trim();
+    if (!addr) { setLcStatus("err", "上の「住所」欄を入力してください（例：東京都港区赤坂1丁目）"); return; }
+    var btn = $("kojiBtn"); btn.disabled = true;
+    setLcStatus("", "住所を座標に変換中…");
+    fetch("https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + encodeURIComponent(addr))
+      .then(function (r) { return r.json(); })
+      .then(function (arr) {
+        if (!arr || !arr.length || !arr[0].geometry) throw new Error("住所が見つかりません");
+        var c = arr[0].geometry.coordinates; // [lon, lat]
+        setLcStatus("", "公示地価を取得中…");
+        return fetch(apiUrl({ resource: "landprice", lon: c[0], lat: c[1] }))
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); });
+      })
+      .then(function (res) {
+        btn.disabled = false;
+        if (!res.ok) { setLcStatus("err", "公示地価の取得に失敗", (res.j && (res.j.error || res.j.detail)) || ""); return; }
+        if (res.j.median == null || !res.j.count) {
+          setLcStatus("warn", "近傍に公示地価の地点が見つかりませんでした", "住所を詳しく指定するか、地価公示ページから手入力してください");
+          return;
+        }
+        $("koji").value = res.j.median;
+        setLcStatus("ok", "✓ 公示地価 " + res.j.median + " 万円/㎡ を反映（近傍 " + res.j.count + " 地点）");
+        refreshLandCheck();
+      })
+      .catch(function (e) { btn.disabled = false; setLcStatus("err", "取得できませんでした", String(e)); });
+  });
+
+  // ---- 物件種別セグメント ----
+  var typeBtns = $("ptype").querySelectorAll("button");
+  typeBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      typeBtns.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      state.ptype = b.getAttribute("data-v");
+      applyTypeUI();
+    });
+  });
+
+  function applyTypeUI() {
+    var t = state.ptype;
+    // 土地は面積・築年数の意味が変わる
+    $("fld-age").style.opacity = (t === "land") ? .4 : 1;
+    $("fld-area").querySelector("label").textContent =
+      t === "land" ? "（建物なし）" : (t === "house" ? "建物面積" : "専有面積");
+    // 構造デフォルト
+    $("structure").value = t === "house" ? "wood" : t === "land" ? "wood" : "rc";
+  }
+  applyTypeUI();
+
+  // ---- ユーティリティ ----
+  function num(id) {
+    var v = parseFloat($(id).value);
+    return isFinite(v) && v > 0 ? v : NaN;
+  }
+  function fmtMan(v) {
+    if (!isFinite(v)) return "—";
+    if (v >= 10000) {
+      var oku = v / 10000;
+      return (oku >= 10 ? oku.toFixed(1) : oku.toFixed(2)) + " 億円";
+    }
+    return Math.round(v).toLocaleString("ja-JP") + " 万円";
+  }
+  function fmtManRaw(v) { return Math.round(v).toLocaleString("ja-JP"); }
+
+  // ---- 各評価手法 ----
+  // 取引事例比較法: 相場単価 × 面積 × 補正（築年・駅距離）
+  function methodComparison(i) {
+    if (!isFinite(i.unitPrice) || !isFinite(i.area)) return null;
+    var base = i.unitPrice * i.area;
+
+    // 築年数補正（マンションは緩やか、木造戸建ては急）
+    var ageAdj = 1;
+    if (i.ptype !== "land" && isFinite(i.age)) {
+      var life = i.ptype === "mansion" ? 47 : 22;
+      // 建物価値割合（種別により建物ウェイト想定）
+      var bWeight = i.ptype === "mansion" ? 0.55 : 0.45;
+      var remain = Math.max(0.1, 1 - i.age / life);        // 建物残存
+      ageAdj = (1 - bWeight) + bWeight * remain;           // 土地部分は減価しない
+    }
+
+    // 駅距離補正（徒歩1分ごとに約1%、10分基準）
+    var walkAdj = 1;
+    if (isFinite(i.walk)) {
+      walkAdj = 1 - (i.walk - 7) * 0.012;
+      walkAdj = Math.max(0.8, Math.min(1.12, walkAdj));
+    }
+
+    return base * ageAdj * walkAdj;
+  }
+
+  // 収益還元法: NOI / cap rate（直接還元法）
+  function methodIncome(i) {
+    if (!isFinite(i.rent) || !isFinite(i.capRate)) return null;
+    var annual = i.rent * 12;
+    var exp = isFinite(i.expenseRate) ? i.expenseRate / 100 : 0.2;
+    var noi = annual * (1 - exp);
+    return noi / (i.capRate / 100);
+  }
+
+  // 原価法: 土地 + 建物再調達原価 × 残存率
+  // ※土地価格が無いと「建物のみ」となり過小評価になるため、土地価格の入力を必須とする
+  function methodCost(i) {
+    if (!isFinite(i.landUnit) || !isFinite(i.landArea)) return null;
+    var land = i.landUnit * i.landArea;
+    var bld = 0;
+    if (i.ptype !== "land" && isFinite(i.area)) {
+      var s = STRUCT[i.structure] || STRUCT.rc;
+      var remain = isFinite(i.age) ? Math.max(0.1, 1 - i.age / s.life) : 1;
+      bld = s.cost * i.area * remain;
+    }
+    return land + bld;
+  }
+
+  // ---- 加重（物件種別で配分） ----
+  function weights(ptype) {
+    if (ptype === "mansion") return { comparison: 0.55, income: 0.30, cost: 0.15 };
+    if (ptype === "house")   return { comparison: 0.50, income: 0.15, cost: 0.35 };
+    return { comparison: 0.55, income: 0.05, cost: 0.40 }; // land
+  }
+
+  // ---- 判定 ----
+  function verdict(ratio) {
+    // ratio = 検討価格 / 推定適正価値
+    if (ratio < 0.90) return { k: "good", t: "割安", msg: "推定適正価値より安く、資産価値の面で有利です。" };
+    if (ratio <= 1.10) return { k: "good", t: "適正", msg: "推定適正価値とほぼ一致しており、妥当な価格帯です。" };
+    if (ratio <= 1.25) return { k: "warn", t: "やや割高", msg: "推定適正価値をやや上回ります。条件や交渉余地を確認しましょう。" };
+    return { k: "bad", t: "割高", msg: "推定適正価値を大きく上回ります。価格妥当性を慎重にご検討ください。" };
+  }
+
+  // ---- メイン ----
+  $("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    var i = {
+      ptype: state.ptype,
+      target: num("targetPrice"),
+      area: num("area"),
+      landArea: num("landArea"),
+      age: parseFloat($("age").value),
+      walk: num("walk"),
+      unitPrice: num("unitPrice"),
+      rent: num("rent"),
+      capRate: num("capRate"),
+      expenseRate: parseFloat($("expenseRate").value),
+      landUnit: num("landUnit"),
+      structure: $("structure").value
+    };
+    if (!isFinite(i.age)) i.age = NaN;
+
+    var m = {
+      comparison: methodComparison(i),
+      income: methodIncome(i),
+      cost: methodCost(i)
+    };
+
+    var w = weights(i.ptype);
+    var sum = 0, wsum = 0, active = [];
+    ["comparison", "income", "cost"].forEach(function (k) {
+      if (m[k] != null && isFinite(m[k]) && m[k] > 0) {
+        sum += m[k] * w[k];
+        wsum += w[k];
+        active.push(k);
+      }
+    });
+
+    var out = $("output");
+    if (wsum === 0) {
+      $("placeholder").hidden = true;
+      out.hidden = false;
+      out.innerHTML = '<div class="placeholder"><span class="big">✏️</span>推定に必要な情報が不足しています。<br>「相場単価＋面積」「賃料＋利回り」「土地単価＋土地面積」のいずれかの組み合わせを入力してください。</div>';
+      return;
+    }
+
+    var estimate = sum / wsum;
+    var low = estimate * 0.9, high = estimate * 1.1;
+
+    render(i, m, w, estimate, low, high, active);
+  });
+
+  function render(i, m, w, est, low, high, active) {
+    $("placeholder").hidden = true;
+    var out = $("output"); out.hidden = false;
+
+    var html = "";
+
+    // 判定ヘッダ
+    var hasTarget = isFinite(i.target);
+    var ratio = hasTarget ? i.target / est : null;
+    var vd = hasTarget ? verdict(ratio) : null;
+
+    html += '<div class="result-head">';
+    html += '<div><div class="sub" style="margin:0">推定適正価値</div>';
+    html += '<div class="est-num">' + fmtMan(est) + '</div>';
+    html += '<div class="est-range">想定レンジ ' + fmtMan(low) + ' 〜 ' + fmtMan(high) + '</div></div>';
+    if (vd) {
+      html += '<div class="verdict ' + vd.k + '"><span class="dot"></span>' + vd.t + '</div>';
+    }
+    html += '</div>';
+
+    // 検討価格との比較
+    if (hasTarget) {
+      var diff = i.target - est;
+      var pct = (diff / est) * 100;
+      html += '<div class="compare-box">';
+      html += '<div class="compare-row"><span>検討中の価格</span><b>' + fmtManRaw(i.target) + ' 万円</b></div>';
+      html += '<div class="compare-row"><span>推定適正価値</span><b>' + fmtManRaw(est) + ' 万円</b></div>';
+      html += '<div class="compare-row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:8px">';
+      html += '<span>差額</span><b style="color:' + (diff > 0 ? 'var(--bad)' : 'var(--good)') + '">' +
+        (diff > 0 ? "+" : "") + fmtManRaw(diff) + ' 万円（' + (pct > 0 ? "+" : "") + pct.toFixed(1) + '%）</b></div>';
+
+      // ゲージ
+      var pos = Math.max(0, Math.min(100, ((ratio - 0.75) / (1.35 - 0.75)) * 100));
+      html += '<div class="gauge"><div class="gauge-track"><div class="gauge-mark" style="left:' + pos + '%"></div></div>';
+      html += '<div class="gauge-labels"><span>割安</span><span>適正</span><span>割高</span></div></div>';
+      html += '<div style="font-size:13px;color:var(--ink-soft);margin-top:6px">' + vd.msg + '</div>';
+      html += '</div>';
+    } else {
+      html += '<div class="notes" style="margin-top:14px">💡「検討中の価格」を入力すると、その価格が適正かどうかの判定が表示されます。</div>';
+    }
+
+    // 手法別内訳
+    html += '<div class="methods"><h3>評価手法別の内訳</h3>';
+    var names = {
+      comparison: { n: "取引事例比較法", d: "相場単価×面積×補正" },
+      income:     { n: "収益還元法",     d: "NOI÷還元利回り" },
+      cost:       { n: "原価法",         d: "土地＋建物再調達原価" }
+    };
+    var maxVal = 0;
+    ["comparison", "income", "cost"].forEach(function (k) { if (m[k] > 0) maxVal = Math.max(maxVal, m[k]); });
+
+    ["comparison", "income", "cost"].forEach(function (k) {
+      var used = active.indexOf(k) >= 0;
+      html += '<div class="mrow"><div class="mtop">';
+      html += '<span class="mname">' + names[k].n + '<span>' + names[k].d + '</span>';
+      if (used) html += '<span class="weight-pill">加重 ' + Math.round(w[k] / active.reduce(function(a,x){return a+w[x];},0) * 100) + '%</span>';
+      html += '</span>';
+      if (used) {
+        html += '<span class="mval">' + fmtMan(m[k]) + '</span></div>';
+        var pct = maxVal > 0 ? (m[k] / maxVal) * 100 : 0;
+        html += '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>';
+      } else {
+        html += '<span class="mval off">入力不足で除外</span></div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+
+    // 土地単価のクロスチェック
+    var le = landEstimates();
+    if (le.length) {
+      html += '<div class="xcheck"><h3>土地単価のクロスチェック（実勢換算）</h3>';
+      le.forEach(function (x) {
+        html += '<div class="xrow"><span class="xsrc">' + x.src + ' <span class="conv">' + x.conv +
+          '</span></span><span class="xval">' + (Math.round(x.val * 10) / 10) + ' 万円/㎡</span></div>';
+      });
+      var med = adoptedLandUnit();
+      if (le.length >= 2) {
+        var vals = le.map(function (x) { return x.val; });
+        var spread = (Math.max.apply(null, vals) - Math.min.apply(null, vals)) / med;
+        if (spread > 0.25) {
+          html += '<div class="xspread warn">⚠ 指標間の乖離が大きめです（約' + Math.round(spread * 100) +
+            '%）。地形・築年・接道などの特殊要因や、売主提示価格の妥当性を確認しましょう。</div>';
+        } else {
+          html += '<div class="xspread ok">✓ 指標間の乖離は小さく（約' + Math.round(spread * 100) +
+            '%）、土地単価の信頼度は高めです。</div>';
+        }
+      }
+      html += '<div style="font-size:12.5px;margin-top:8px;color:var(--ink-soft)">採用（中央値）: <b style="color:var(--ink)">' +
+        (Math.round(med * 10) / 10) + ' 万円/㎡</b> を原価法の土地単価に使用</div>';
+      html += '</div>';
+    }
+
+    // 補足
+    html += '<div class="notes"><b>この推定について</b><ul>';
+    html += '<li>物件種別「' + ({mansion:"マンション",house:"戸建て",land:"土地"}[i.ptype]) + '」の標準的な加重で ' + active.length + ' 手法を合成しています。</li>';
+    if (active.indexOf("comparison") >= 0 && isFinite(i.walk))
+      html += '<li>駅徒歩・築年数による相場補正を反映しています。</li>';
+    html += '<li>入力を増やすほど（賃料・土地単価など）精度が上がります。</li>';
+    html += '</ul></div>';
+
+    out.innerHTML = html;
+    out.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    // バーアニメーション用に一旦0→
+    requestAnimationFrame(function () {
+      out.querySelectorAll(".bar-fill").forEach(function (el) {
+        var w = el.style.width; el.style.width = "0%";
+        requestAnimationFrame(function () { el.style.width = w; });
+      });
+    });
+  }
+})();
+</script>
