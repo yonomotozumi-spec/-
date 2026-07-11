@@ -1,0 +1,571 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>蓄電池設置 予実進捗管理シート</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --panel:#ffffff; --ink:#1a2230; --muted:#6b7688;
+    --line:#e3e8f0; --line2:#eef1f6;
+    --brand:#2563eb; --brand-ink:#1d4ed8;
+    --ok:#15803d; --ok-bg:#e7f6ec;
+    --warn:#b45309; --warn-bg:#fdf1dd;
+    --bad:#b91c1c; --bad-bg:#fdecec;
+    --idle:#64748b; --idle-bg:#eef1f6;
+    --run:#1d4ed8; --run-bg:#e7eefe;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 6px 20px rgba(16,24,40,.06);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
+    color:var(--ink); background:var(--bg); line-height:1.5;
+    -webkit-text-size-adjust:100%;
+  }
+  header.app{
+    background:linear-gradient(180deg,#1e293b,#0f172a); color:#fff;
+    padding:18px 20px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  header.app .logo{
+    width:40px;height:40px;border-radius:10px;flex:none;
+    background:linear-gradient(135deg,#22d3ee,#2563eb);
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+  }
+  header.app h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.02em}
+  header.app .sub{font-size:12px;color:#9fb0c9;margin-top:2px}
+  header.app .spacer{flex:1}
+  .wrap{max-width:1240px;margin:0 auto;padding:20px}
+
+  /* buttons */
+  button{font:inherit;cursor:pointer}
+  .btn{
+    border:1px solid var(--line); background:#fff; color:var(--ink);
+    padding:8px 14px;border-radius:9px;font-weight:600;font-size:13px;
+    display:inline-flex;align-items:center;gap:6px;transition:.15s;
+  }
+  .btn:hover{border-color:#c7d0de;background:#fafbfd}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.primary:hover{background:var(--brand-ink);border-color:var(--brand-ink)}
+  .btn.ghost{background:transparent;border-color:rgba(255,255,255,.25);color:#fff}
+  .btn.ghost:hover{background:rgba(255,255,255,.12)}
+  .btn.sm{padding:5px 9px;font-size:12px}
+  .btn.danger{color:var(--bad);border-color:#f0c9c9}
+  .btn.danger:hover{background:var(--bad-bg)}
+
+  /* dashboard */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:18px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+       padding:14px 16px;box-shadow:var(--shadow)}
+  .kpi .n{font-size:28px;font-weight:800;letter-spacing:-.02em}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .kpi.b .n{color:var(--brand)}
+  .kpi.g .n{color:var(--ok)}
+  .kpi.r .n{color:var(--bad)}
+  .kpi.w .n{color:var(--warn)}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .toolbar .spacer{flex:1}
+  .search{
+    border:1px solid var(--line);border-radius:9px;padding:8px 12px;font:inherit;
+    min-width:200px;background:#fff;
+  }
+  select.filter{border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit;background:#fff}
+
+  /* project cards */
+  .projects{display:flex;flex-direction:column;gap:14px}
+  .empty{
+    background:var(--panel);border:1px dashed var(--line);border-radius:var(--radius);
+    padding:44px 20px;text-align:center;color:var(--muted);
+  }
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+        box-shadow:var(--shadow);overflow:hidden}
+  .card .head{padding:14px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;cursor:pointer}
+  .card .head:hover{background:#fafbff}
+  .card .caret{transition:.2s;color:var(--muted);font-size:12px}
+  .card.open .caret{transform:rotate(90deg)}
+  .card .title{font-weight:700;font-size:15px}
+  .card .meta{font-size:12px;color:var(--muted);margin-top:2px;display:flex;gap:12px;flex-wrap:wrap}
+  .card .headspacer{flex:1}
+
+  .badge{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .b-idle{color:var(--idle);background:var(--idle-bg)}
+  .b-run{color:var(--run);background:var(--run-bg)}
+  .b-ok{color:var(--ok);background:var(--ok-bg)}
+  .b-bad{color:var(--bad);background:var(--bad-bg)}
+  .b-warn{color:var(--warn);background:var(--warn-bg)}
+
+  /* progress bar */
+  .pbar{width:120px;height:8px;border-radius:999px;background:var(--line2);overflow:hidden;flex:none}
+  .pbar > i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:999px}
+  .pct{font-size:12px;font-weight:700;color:var(--muted);min-width:34px;text-align:right}
+
+  .body{border-top:1px solid var(--line2);padding:4px 0 6px}
+  .grid-wrap{overflow-x:auto}
+  table.ph{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+  table.ph th,table.ph td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line2);vertical-align:middle}
+  table.ph th{font-size:11px;color:var(--muted);font-weight:700;background:#fafbfd;text-transform:none;position:sticky;top:0}
+  table.ph td.ph-name{font-weight:600;white-space:nowrap}
+  table.ph input[type=date]{border:1px solid var(--line);border-radius:7px;padding:5px 7px;font:inherit;background:#fff}
+  table.ph input[type=date].filled{border-color:#bcd0f7;background:#f5f9ff}
+  .rowstatus{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .rs-idle{background:#cbd5e1}.rs-run{background:#3b82f6}.rs-ok{background:#22c55e}.rs-bad{background:#ef4444}.rs-warn{background:#f59e0b}
+  .delaycell{font-weight:700}
+  .delay-pos{color:var(--bad)} .delay-neg{color:var(--ok)} .delay-zero{color:var(--muted)}
+
+  .cardfoot{padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line2);background:#fafbfd}
+  .note{font-size:12px;color:var(--muted)}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:flex-start;
+            justify-content:center;padding:30px 16px;z-index:50;overflow:auto}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:14px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal h2{margin:0;padding:18px 20px;font-size:16px;border-bottom:1px solid var(--line)}
+  .modal .form{padding:18px 20px;display:grid;gap:14px}
+  .field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .field input,.field select,.field textarea{
+    width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font:inherit;background:#fff
+  }
+  .field textarea{resize:vertical;min-height:60px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .modal .foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
+
+  footer.app{color:var(--muted);font-size:12px;text-align:center;padding:24px}
+  .hint{font-size:12px;color:var(--muted);margin:-6px 0 12px}
+
+  @media (max-width:640px){
+    .card .meta{width:100%}
+    .row2{grid-template-columns:1fr}
+    header.app h1{font-size:16px}
+  }
+  @media print{
+    header.app .btn,.toolbar,.cardfoot,.caret,footer.app{display:none!important}
+    body{background:#fff}
+    .card{break-inside:avoid;box-shadow:none;border-color:#ccc}
+    .body{display:block!important}
+  }
+</style>
+
+<header class="app">
+  <div class="logo">🔋</div>
+  <div>
+    <h1>蓄電池設置 予実進捗管理シート</h1>
+    <div class="sub">案件ごとの工程を「予定 / 実績」で管理し、進捗・遅延を自動判定</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn ghost sm" id="btnCsvOut">⬇ CSV出力</button>
+  <button class="btn ghost sm" id="btnCsvIn">⬆ CSV取込</button>
+  <button class="btn ghost sm" id="btnPrint">🖨 印刷</button>
+  <button class="btn primary" id="btnNew">＋ 新規案件</button>
+  <input type="file" id="fileCsv" accept=".csv" hidden />
+</header>
+
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+
+  <div class="toolbar">
+    <input class="search" id="search" placeholder="🔍 案件名・顧客・担当で検索" />
+    <select class="filter" id="fStatus">
+      <option value="">すべてのステータス</option>
+      <option value="run">進行中</option>
+      <option value="delay">遅延あり</option>
+      <option value="done">完了</option>
+      <option value="idle">未着手</option>
+    </select>
+    <select class="filter" id="fSort">
+      <option value="due">次期限が近い順</option>
+      <option value="order">受注日が新しい順</option>
+      <option value="progress">進捗が低い順</option>
+      <option value="name">案件名順</option>
+    </select>
+    <div class="spacer"></div>
+    <span class="note" id="count"></span>
+  </div>
+
+  <div class="projects" id="projects"></div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">新規案件</h2>
+    <div class="form">
+      <div class="field">
+        <label>案件名 <span style="color:#ef4444">*</span></label>
+        <input id="mName" placeholder="例）〇〇邸 蓄電池設置工事" />
+      </div>
+      <div class="row2">
+        <div class="field"><label>顧客名</label><input id="mCustomer" placeholder="例）山田 太郎" /></div>
+        <div class="field"><label>担当者</label><input id="mOwner" placeholder="例）鈴木" /></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>容量 (kWh)</label><input id="mCapacity" type="number" step="0.1" placeholder="例）9.8" /></div>
+        <div class="field"><label>受注日</label><input id="mOrder" type="date" /></div>
+      </div>
+      <div class="field"><label>設置住所 / メモ</label><textarea id="mAddr" placeholder="住所・機器型番・補助金の種類など"></textarea></div>
+    </div>
+    <div class="foot">
+      <button class="btn" id="mCancel">キャンセル</button>
+      <button class="btn primary" id="mSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<footer class="app">
+  データはこのブラウザ内（localStorage）にのみ保存されます。バックアップはCSV出力をご利用ください。
+</footer>
+
+<script>
+/* ============================================================
+   蓄電池設置 予実進捗管理シート  —  単一HTMLアプリ
+   ============================================================ */
+
+const PHASES = [
+  "受注・契約",
+  "現地調査",
+  "設計・図面",
+  "補助金申請",
+  "系統連系申請",
+  "機器発注・納品",
+  "設置工事",
+  "完了検査・連系",
+  "引渡し",
+];
+
+const LS_KEY = "battery_progress_v1";
+const todayStr = () => new Date().toISOString().slice(0,10);
+
+let state = load();        // { projects:[...] }
+let openIds = new Set();   // 展開中カード
+let editingId = null;      // 編集中の案件id
+
+/* ---------- 永続化 ---------- */
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { projects: seed() };
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+function seed(){
+  // 初回のサンプル案件（自由に削除してください）
+  const mk = (offset)=>{ const d=new Date(); d.setDate(d.getDate()+offset); return d.toISOString().slice(0,10); };
+  return [{
+    id: uid(), name:"サンプル：〇〇邸 蓄電池設置工事", customer:"山田 太郎", owner:"鈴木",
+    capacity:9.8, order:mk(-30), addr:"（サンプルデータ。不要なら削除してください）",
+    phases: PHASES.map((n,i)=>({
+      name:n,
+      plan: mk(-25 + i*5),
+      actual: i<4 ? mk(-24 + i*5) : ""   // 途中まで実績あり
+    }))
+  }];
+}
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+/* ---------- 進捗・ステータス計算 ---------- */
+function diffDays(a,b){ // a,b: yyyy-mm-dd  → a-b (日)
+  return Math.round((new Date(a) - new Date(b)) / 86400000);
+}
+
+function analyze(p){
+  const T = todayStr();
+  let done=0, delayed=0, nextDue=null, lastActual=null;
+  p.phases.forEach(ph=>{
+    if(ph.actual){ done++; lastActual = ph.actual; }
+    else if(ph.plan){
+      if(!nextDue || ph.plan < nextDue) nextDue = ph.plan;
+      if(ph.plan < T) delayed++;          // 予定過ぎて未完了 = 遅延
+    }
+  });
+  const total = p.phases.length;
+  const pct = Math.round(done/total*100);
+  let status, label, cls;
+  if(done===total){ status="done"; label="完了"; cls="b-ok"; }
+  else if(delayed>0){ status="delay"; label="遅延 "+delayed+"件"; cls="b-bad"; }
+  else if(done>0 || p.phases.some(x=>x.plan||x.actual)){ status="run"; label="進行中"; cls="b-run"; }
+  else { status="idle"; label="未着手"; cls="b-idle"; }
+  return { pct, done, total, delayed, status, label, cls, nextDue, lastActual };
+}
+
+function phaseRowStatus(ph){
+  const T = todayStr();
+  if(ph.actual){
+    // 予定に対する実績の遅れ（あれば警告色）
+    if(ph.plan && diffDays(ph.actual, ph.plan) > 0) return {dot:"rs-warn"};
+    return {dot:"rs-ok"};
+  }
+  if(ph.plan && ph.plan < T) return {dot:"rs-bad"};      // 期限超過・未完了
+  if(ph.plan) return {dot:"rs-run"};                      // 予定あり・これから
+  return {dot:"rs-idle"};
+}
+
+/* ---------- 描画 ---------- */
+function renderKPIs(){
+  const ps = state.projects;
+  let run=0,done=0,delay=0,dueSoon=0;
+  const T = todayStr(), soon = new Date(); soon.setDate(soon.getDate()+7);
+  const soonStr = soon.toISOString().slice(0,10);
+  ps.forEach(p=>{
+    const a = analyze(p);
+    if(a.status==="done") done++;
+    else if(a.status==="delay") delay++;
+    else if(a.status==="run") run++;
+    if(a.nextDue && a.nextDue>=T && a.nextDue<=soonStr) dueSoon++;
+  });
+  const el = document.getElementById("kpis");
+  el.innerHTML = `
+    ${kpi(ps.length,"総案件数","b")}
+    ${kpi(run+delay,"進行中","w")}
+    ${kpi(delay,"遅延あり","r")}
+    ${kpi(dueSoon,"7日以内に期限","w")}
+    ${kpi(done,"完了","g")}
+  `;
+}
+function kpi(n,l,c){ return `<div class="kpi ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`; }
+
+function esc(s){ return (s??"").toString().replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+function renderProjects(){
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const fStatus = document.getElementById("fStatus").value;
+  const fSort = document.getElementById("fSort").value;
+
+  let list = state.projects.map(p=>({p, a:analyze(p)}));
+
+  if(q) list = list.filter(({p})=>
+    (p.name+" "+p.customer+" "+p.owner+" "+(p.addr||"")).toLowerCase().includes(q));
+  if(fStatus) list = list.filter(({a})=>a.status===fStatus);
+
+  list.sort((x,y)=>{
+    if(fSort==="name") return x.p.name.localeCompare(y.p.name,"ja");
+    if(fSort==="order") return (y.p.order||"").localeCompare(x.p.order||"");
+    if(fSort==="progress") return x.a.pct - y.a.pct;
+    // due
+    const dx = x.a.nextDue||"9999", dy = y.a.nextDue||"9999";
+    return dx.localeCompare(dy);
+  });
+
+  document.getElementById("count").textContent =
+    `${list.length} / ${state.projects.length} 件を表示`;
+
+  const wrap = document.getElementById("projects");
+  if(list.length===0){
+    wrap.innerHTML = `<div class="empty">該当する案件がありません。<br>右上の「＋ 新規案件」から追加してください。</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(({p,a})=>card(p,a)).join("");
+}
+
+function card(p,a){
+  const open = openIds.has(p.id);
+  const T = todayStr();
+  const dueTxt = a.nextDue ? `次期限 ${fmt(a.nextDue)}${a.nextDue<T?" ⚠":""}` : (a.status==="done"?"全工程完了":"予定日未設定");
+  const rows = p.phases.map((ph,i)=>{
+    const rs = phaseRowStatus(ph);
+    let delayTxt="—", dcls="delay-zero";
+    if(ph.actual && ph.plan){
+      const d = diffDays(ph.actual, ph.plan);
+      if(d>0){ delayTxt = "+"+d+"日"; dcls="delay-pos"; }
+      else if(d<0){ delayTxt = d+"日"; dcls="delay-neg"; }
+      else { delayTxt="±0"; dcls="delay-zero"; }
+    } else if(!ph.actual && ph.plan && ph.plan<T){
+      delayTxt = "+"+diffDays(T,ph.plan)+"日"; dcls="delay-pos";
+    }
+    return `<tr data-pi="${i}">
+      <td class="ph-name"><span class="rowstatus ${rs.dot}"></span>${esc(ph.name)}</td>
+      <td><input type="date" class="pl-plan ${ph.plan?'filled':''}" value="${ph.plan||''}"></td>
+      <td><input type="date" class="pl-actual ${ph.actual?'filled':''}" value="${ph.actual||''}"></td>
+      <td class="delaycell ${dcls}">${delayTxt}</td>
+    </tr>`;
+  }).join("");
+
+  return `<div class="card ${open?'open':''}" data-id="${p.id}">
+    <div class="head js-toggle">
+      <span class="caret">▶</span>
+      <div>
+        <div class="title">${esc(p.name)}</div>
+        <div class="meta">
+          ${p.customer?`<span>👤 ${esc(p.customer)}</span>`:""}
+          ${p.owner?`<span>🧑‍🔧 ${esc(p.owner)}</span>`:""}
+          ${p.capacity?`<span>⚡ ${esc(p.capacity)}kWh</span>`:""}
+          ${p.order?`<span>📄 受注 ${fmt(p.order)}</span>`:""}
+          <span>📅 ${dueTxt}</span>
+        </div>
+      </div>
+      <div class="headspacer"></div>
+      <div class="pbar"><i style="width:${a.pct}%"></i></div>
+      <span class="pct">${a.pct}%</span>
+      <span class="badge ${a.cls}">${a.label}</span>
+    </div>
+    <div class="body" style="${open?'':'display:none'}">
+      <div class="grid-wrap">
+        <table class="ph">
+          <thead><tr><th>工程</th><th>予定日</th><th>実績日</th><th>予実差</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div class="cardfoot">
+        <button class="btn sm js-edit">✏️ 案件情報を編集</button>
+        <button class="btn sm js-fill-today">✓ 実績を今日で埋める</button>
+        <span class="note">${p.addr?esc(p.addr):""}</span>
+        <div class="headspacer" style="flex:1"></div>
+        <button class="btn sm danger js-del">🗑 削除</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function fmt(d){ if(!d) return ""; const [y,m,da]=d.split("-"); return `${m}/${da}`; }
+
+function render(){ renderKPIs(); renderProjects(); save(); }
+
+/* ---------- イベント ---------- */
+document.getElementById("projects").addEventListener("click", e=>{
+  const card = e.target.closest(".card"); if(!card) return;
+  const id = card.dataset.id;
+  const p = state.projects.find(x=>x.id===id); if(!p) return;
+
+  if(e.target.closest(".js-toggle") && !e.target.matches("input")){
+    if(openIds.has(id)) openIds.delete(id); else openIds.add(id);
+    renderProjects(); return;
+  }
+  if(e.target.closest(".js-edit")){ openModal(p); return; }
+  if(e.target.closest(".js-del")){
+    if(confirm(`「${p.name}」を削除しますか？`)){
+      state.projects = state.projects.filter(x=>x.id!==id); openIds.delete(id); render();
+    } return;
+  }
+  if(e.target.closest(".js-fill-today")){
+    p.phases.forEach(ph=>{ if(ph.plan && ph.plan<=todayStr() && !ph.actual) ph.actual = todayStr(); });
+    render(); return;
+  }
+});
+
+// 日付入力（予定/実績）の変更を保存
+document.getElementById("projects").addEventListener("change", e=>{
+  if(!e.target.matches(".pl-plan,.pl-actual")) return;
+  const card = e.target.closest(".card"); const tr = e.target.closest("tr");
+  const p = state.projects.find(x=>x.id===card.dataset.id);
+  const ph = p.phases[+tr.dataset.pi];
+  if(e.target.classList.contains("pl-plan")) ph.plan = e.target.value;
+  else ph.actual = e.target.value;
+  render();
+});
+
+/* ---------- モーダル ---------- */
+function openModal(p){
+  editingId = p ? p.id : null;
+  document.getElementById("modalTitle").textContent = p ? "案件情報を編集" : "新規案件";
+  document.getElementById("mName").value = p?.name || "";
+  document.getElementById("mCustomer").value = p?.customer || "";
+  document.getElementById("mOwner").value = p?.owner || "";
+  document.getElementById("mCapacity").value = p?.capacity || "";
+  document.getElementById("mOrder").value = p?.order || todayStr();
+  document.getElementById("mAddr").value = p?.addr || "";
+  document.getElementById("modalBg").classList.add("show");
+  document.getElementById("mName").focus();
+}
+function closeModal(){ document.getElementById("modalBg").classList.remove("show"); editingId=null; }
+
+document.getElementById("btnNew").onclick = ()=>openModal(null);
+document.getElementById("mCancel").onclick = closeModal;
+document.getElementById("modalBg").addEventListener("click", e=>{ if(e.target.id==="modalBg") closeModal(); });
+document.getElementById("mSave").onclick = ()=>{
+  const name = document.getElementById("mName").value.trim();
+  if(!name){ alert("案件名を入力してください。"); return; }
+  const data = {
+    name,
+    customer: document.getElementById("mCustomer").value.trim(),
+    owner: document.getElementById("mOwner").value.trim(),
+    capacity: document.getElementById("mCapacity").value.trim(),
+    order: document.getElementById("mOrder").value,
+    addr: document.getElementById("mAddr").value.trim(),
+  };
+  if(editingId){
+    Object.assign(state.projects.find(x=>x.id===editingId), data);
+  }else{
+    const p = { id:uid(), ...data, phases: PHASES.map(n=>({name:n,plan:"",actual:""})) };
+    state.projects.unshift(p); openIds.add(p.id);
+  }
+  closeModal(); render();
+};
+
+/* ---------- ツールバー ---------- */
+["search","fStatus","fSort"].forEach(id=>
+  document.getElementById(id).addEventListener("input", renderProjects));
+document.getElementById("btnPrint").onclick = ()=>{
+  state.projects.forEach(p=>openIds.add(p.id)); renderProjects();
+  setTimeout(()=>window.print(), 60);
+};
+
+/* ---------- CSV 入出力 ---------- */
+function csvCell(s){ s=(s??"").toString(); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+document.getElementById("btnCsvOut").onclick = ()=>{
+  const head = ["案件ID","案件名","顧客","担当","容量kWh","受注日","メモ","工程","予定日","実績日"];
+  const rows = [head];
+  state.projects.forEach(p=>p.phases.forEach(ph=>{
+    rows.push([p.id,p.name,p.customer,p.owner,p.capacity,p.order,p.addr,ph.name,ph.plan,ph.actual]);
+  }));
+  const csv = "﻿"+rows.map(r=>r.map(csvCell).join(",")).join("\r\n");
+  const url = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  const a = document.createElement("a");
+  a.href=url; a.download=`蓄電池進捗_${todayStr()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+};
+document.getElementById("btnCsvIn").onclick = ()=>document.getElementById("fileCsv").click();
+document.getElementById("fileCsv").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{ importCsv(r.result); }
+    catch(err){ alert("CSVの読み込みに失敗しました：\n"+err.message); }
+    e.target.value="";
+  };
+  r.readAsText(f);
+});
+function parseCsv(text){
+  text = text.replace(/^﻿/,"");
+  const rows=[]; let row=[],cur="",q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; }
+      else cur+=c;
+    }else{
+      if(c==='"') q=true;
+      else if(c===',') { row.push(cur); cur=""; }
+      else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=""; }
+      else if(c==='\r'){}
+      else cur+=c;
+    }
+  }
+  if(cur!==""||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r=>r.length>1 || (r.length===1&&r[0]!==""));
+}
+function importCsv(text){
+  const rows = parseCsv(text);
+  if(rows.length<2){ alert("データ行がありません。"); return; }
+  const map = {}; // id → project
+  for(let i=1;i<rows.length;i++){
+    const [id,name,customer,owner,capacity,order,addr,phName,plan,actual] = rows[i];
+    if(!name) continue;
+    const key = id || name;
+    if(!map[key]){
+      map[key] = { id: uid(), name, customer, owner, capacity, order, addr,
+                   phases: PHASES.map(n=>({name:n,plan:"",actual:""})) };
+    }
+    const ph = map[key].phases.find(x=>x.name===phName);
+    if(ph){ ph.plan=plan||""; ph.actual=actual||""; }
+  }
+  const imported = Object.values(map);
+  if(!imported.length){ alert("有効な案件がありませんでした。"); return; }
+  if(confirm(`${imported.length} 件を読み込みます。\n「OK」＝現在のデータに追加 / 「キャンセル」＝中止`)){
+    state.projects = imported.concat(state.projects);
+    render();
+    alert(`${imported.length} 件を取り込みました。`);
+  }
+}
+
+render();
+</script>
