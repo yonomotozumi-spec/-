@@ -361,6 +361,14 @@
         <div id="lcStatus" class="fetch-status"></div>
       </div>
 
+      <!-- 保安林の自動判定（国土数値情報 森林地域 A13） -->
+      <div class="field autobox">
+        <label>保安林の自動判定 <span class="hint">（国土数値情報 森林地域 A13）</span></label>
+        <span class="hint" style="display:block;margin-bottom:8px">上の「住所」と「都道府県」から、その地点が保安林に該当するかを判定します。</span>
+        <button type="button" id="hoanrinBtn" class="btn-fetch">🌲 保安林を判定</button>
+        <div id="hoanrinStatus" class="fetch-status"></div>
+      </div>
+
       <details class="adv">
         <summary>収益還元法の条件（投資／賃貸を想定する場合）</summary>
         <div class="body">
@@ -459,7 +467,7 @@
   };
 
   var $ = function (id) { return document.getElementById(id); };
-  var state = { ptype: "mansion", marketLand: null };
+  var state = { ptype: "mansion", marketLand: null, hoanrin: null };
 
   // ---- テーマ切替 ----
   $("themeBtn").addEventListener("click", function () {
@@ -519,6 +527,8 @@
 
   // 都道府県変更 → 市区町村一覧を取得
   prefSel.addEventListener("change", function () {
+    state.hoanrin = null;                       // 都道府県が変われば保安林判定はやり直し
+    if ($("hoanrinStatus")) setHoanrinStatus("", "");
     citySel.innerHTML = '<option value="">市区町村（任意）</option>';
     if (!prefSel.value) return;
     setStatus("", "市区町村を取得中…");
@@ -665,6 +675,59 @@
         refreshLandCheck();
       })
       .catch(function (e) { btn.disabled = false; setLcStatus("err", "取得できませんでした", String(e)); });
+  });
+
+  // ---- 保安林の自動判定 ----
+  // 住所 → 国土地理院ジオコーディング → 緯度経度
+  function geocode(addr) {
+    return fetch("https://msearch.gsi.go.jp/address-search/AddressSearch?q=" + encodeURIComponent(addr))
+      .then(function (r) { return r.json(); })
+      .then(function (arr) {
+        if (!arr || !arr.length || !arr[0].geometry) throw new Error("住所が見つかりません");
+        return arr[0].geometry.coordinates; // [lon, lat]
+      });
+  }
+  // 中継APIのURLから /api/hoanrin を導出（apiBase の reinfolib → hoanrin）
+  function hoanrinUrl(params) {
+    var base = ($("apiBase").value || "/api/reinfolib").trim();
+    var h = /reinfolib/i.test(base) ? base.replace(/reinfolib/i, "hoanrin") : "/api/hoanrin";
+    var qs = Object.keys(params).filter(function (k) { return params[k] != null && params[k] !== ""; })
+      .map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); }).join("&");
+    return h + (h.indexOf("?") >= 0 ? "&" : "?") + qs;
+  }
+  function setHoanrinStatus(cls, msg, detail) {
+    var el = $("hoanrinStatus");
+    el.className = "fetch-status " + (cls || "");
+    el.innerHTML = msg + (detail ? '<span class="detail">' + detail + "</span>" : "");
+  }
+  $("hoanrinBtn").addEventListener("click", function () {
+    var addr = ($("addr").value || "").trim();
+    var area = prefSel.value;
+    if (!area) { setHoanrinStatus("err", "都道府県を選択してください"); return; }
+    if (!addr) { setHoanrinStatus("err", "上の「住所」欄を入力してください（例：北海道虻田郡◯◯町△△）"); return; }
+    var btn = $("hoanrinBtn"); btn.disabled = true;
+    setHoanrinStatus("", "住所を座標に変換中…");
+    geocode(addr).then(function (c) {
+      setHoanrinStatus("", "保安林を判定中…");
+      return fetch(hoanrinUrl({ area: area, lon: c[0], lat: c[1] }))
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); });
+    }).then(function (res) {
+      btn.disabled = false;
+      if (!res.ok) { setHoanrinStatus("err", "判定に失敗しました", (res.j && (res.j.error || res.j.detail)) || ""); return; }
+      var j = res.j;
+      if (!j.available) {
+        state.hoanrin = { available: false, hit: false, kinds: [] };
+        setHoanrinStatus("warn", "この都道府県の保安林データが未整備です",
+          "data/hoanrin/" + j.area + ".geojson を scripts/build-hoanrin.mjs で生成してください");
+      } else if (j.hit) {
+        state.hoanrin = { available: true, hit: true, kinds: j.kinds || [] };
+        setHoanrinStatus("warn", "⚠ 該当：保安林です" + (j.kinds && j.kinds.length ? "（" + j.kinds.join("・") + "）" : ""),
+          "開発には解除等の手続き・制限が伴う可能性があります。診断結果にも反映しました。");
+      } else {
+        state.hoanrin = { available: true, hit: false, kinds: [] };
+        setHoanrinStatus("ok", "✓ 非該当：この地点は保安林ではありません", "診断結果にも反映しました。");
+      }
+    }).catch(function (e) { btn.disabled = false; setHoanrinStatus("err", "判定できませんでした", String(e)); });
   });
 
   // ---- 地区別 中古相場の比較 ----
@@ -843,6 +906,32 @@
     return { k: "bad", t: "割高", msg: "推定適正価値を大きく上回ります。価格妥当性を慎重にご検討ください。" };
   }
 
+  // 保安林 判定の結果ブロック（診断アウトプットに常に表示）
+  function renderHoanrin() {
+    var h = state.hoanrin;
+    var color, label, detail;
+    if (!h) {
+      color = "var(--ink-soft)"; label = "未判定";
+      detail = "入力欄の「🌲 保安林を判定」を押すと、この地点が保安林かどうかを判定します。";
+    } else if (!h.available) {
+      color = "var(--warn)"; label = "データ未整備";
+      detail = "この都道府県の保安林データが未整備です（scripts/build-hoanrin.mjs で生成してください）。";
+    } else if (h.hit) {
+      color = "var(--bad)";
+      label = "⚠ 該当（保安林）" + (h.kinds && h.kinds.length ? "：" + h.kinds.join("・") : "");
+      detail = "保安林内は立木伐採・土地造成等に制限があり、開発には解除等の手続きが必要な場合があります。所管の都道府県林務部局にご確認ください。";
+    } else {
+      color = "var(--good)"; label = "✓ 非該当";
+      detail = "この地点は保安林ポリゴンに含まれていません（国土数値情報 森林地域 A13 基準）。";
+    }
+    var html = '<div class="xcheck"><h3>🌲 保安林の判定</h3>';
+    html += '<div class="xrow"><span class="xsrc">判定結果</span>' +
+      '<span class="xval" style="color:' + color + '">' + label + '</span></div>';
+    html += '<div style="font-size:12px;margin-top:8px;color:var(--ink-soft)">' + detail + '</div>';
+    html += '</div>';
+    return html;
+  }
+
   // ---- メイン ----
   $("form").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -996,6 +1085,9 @@
         (Math.round(med * 10) / 10) + ' 万円/㎡</b> を原価法の土地単価に使用</div>';
       html += '</div>';
     }
+
+    // 保安林の判定（立地デューデリ）
+    html += renderHoanrin();
 
     // 補足
     html += '<div class="notes"><b>この推定について</b><ul>';

@@ -77,6 +77,34 @@ vercel --prod                # 本番デプロイ
 - 採用値（各指標の中央値）が原価法の土地単価に反映されます。
 - ⚠️ 路線価は国税庁に公式APIが無いため**手入力**です。公示地価の自動取得はGISタイル方式で、近傍に地点が無い場合は手入力にフォールバックします。
 
+## 保安林の自動判定（立地デューデリ）
+
+住所（＋都道府県）から、その地点が **保安林に該当するか**を自動判定し、診断結果に表示します。
+保安林内は立木伐採・土地造成などに制限があり、開発可否に直結するためチェックできます。
+
+- 権威データは **国土交通省「国土数値情報 森林地域データ(A13)」の保安林ポリゴン**です。
+- 判定は「住所→[国土地理院ジオコーディング](https://msearch.gsi.go.jp/)→緯度経度」に変換し、
+  中継API `/api/hoanrin` が**ポリゴン内包判定（point-in-polygon）**で該当/非該当を返します。
+- 結果は診断アウトプットに「🌲 保安林の判定：該当（種別）/ 非該当 / 未判定 / データ未整備」として表示されます。
+
+### データの用意（保安林ポリゴン）
+
+保安林ポリゴンは大容量のためリポジトリには同梱していません。**必要な都道府県だけ**生成します。
+
+1. [国土数値情報 森林地域データ(A13)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A13.html) を
+   都道府県ごとにダウンロード（無償）して展開します。
+2. 保安林だけを抽出・簡略化して GeoJSON を生成します（`mapshaper` を npx で自動取得）:
+   ```bash
+   node scripts/build-hoanrin.mjs --input ./A13-15_13_GML/A13-15_13.shp --pref 13
+   # → data/hoanrin/13.geojson を生成（13 = 東京都）
+   ```
+   保安施設地区も含めたい場合は `--codes 3,4`、属性名が異なる年次では `--field <名>` で調整します。
+3. デプロイすると `/api/hoanrin?area=13&lat=..&lon=..` が参照します。
+
+> 大容量になる場合は生成した GeoJSON を CDN 等に置き、環境変数 `HOANRIN_DATA_BASE`
+> にベースURLを設定すると、`api/hoanrin.js` は `{HOANRIN_DATA_BASE}/{area}.geojson` を取得します。
+> データが未整備の都道府県は「データ未整備」と表示されます（誤って非該当とは出しません）。
+
 ## 判定基準
 
 `検討価格 ÷ 推定適正価値` の比率で判定します。
@@ -88,15 +116,22 @@ vercel --prod                # 本番デプロイ
 ## 構成
 
 ```
-index.html          フロントエンド（単一ファイル・UI＋計算ロジック）
-api/reinfolib.js    中継サーバーレス関数（APIキーを保持・CORS対応・取引データ集計）
-package.json        Node ランタイム宣言
+index.html              フロントエンド（単一ファイル・UI＋計算ロジック）
+api/reinfolib.js        中継サーバーレス関数（APIキーを保持・CORS対応・取引データ集計）
+api/hoanrin.js          保安林 判定サーバーレス関数（緯度経度→ポリゴン内包判定。APIキー不要）
+scripts/build-hoanrin.mjs 国土数値情報A13から保安林GeoJSONを生成するスクリプト
+data/hoanrin/           保安林ポリゴン（都道府県コード別 GeoJSON。生成物を配置）
 ```
 
 ### 中継APIの仕様（`/api/reinfolib`）
 - `?resource=cities&area=13` … 都道府県内の市区町村一覧
 - `?resource=price&area=13&city=13103&year=2023` … 取引価格を種別ごとに集計し、㎡単価（万円/㎡）の中央値を返す
 - `?resource=landprice&lat=35.68&lon=139.76` … 緯度経度近傍の公示地価・地価調査の中央値（万円/㎡）を返す
+
+### 保安林判定APIの仕様（`/api/hoanrin`）
+- `?area=13&lat=35.68&lon=139.76` … その地点が保安林に該当するかを返す
+  （`{ available, hit, kinds }`。`available:false` はその都道府県のデータ未整備）
+- APIキーは不要。`data/hoanrin/{area}.geojson`（または `HOANRIN_DATA_BASE`）を用いて内包判定します。
 
 いずれも環境変数 `REINFOLIB_API_KEY` を用いて国交省APIを呼び出します。
 公示地価の取得では、フロント側で[国土地理院ジオコーディングAPI](https://msearch.gsi.go.jp/)（無料・キー不要）を使い住所→緯度経度に変換しています。
