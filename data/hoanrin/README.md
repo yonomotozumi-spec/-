@@ -7,6 +7,12 @@
 
 国土数値情報「森林地域データ(A13)」から保安林だけを抽出して生成します。
 
+**ワンコマンド（nlftp.mlit.go.jp に通信できる環境）**:
+```bash
+node scripts/fetch-hoanrin.mjs --pref 13   # DL→展開→抽出→13.geojson まで一括
+```
+
+**手動**:
 1. A13 を都道府県ごとにダウンロード（無償）
    https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A13.html
 2. 展開したら変換:

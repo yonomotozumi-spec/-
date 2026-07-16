@@ -91,6 +91,15 @@ vercel --prod                # 本番デプロイ
 
 保安林ポリゴンは大容量のためリポジトリには同梱していません。**必要な都道府県だけ**生成します。
 
+**（推奨）ワンコマンド取得**: 国土数値情報サイトへ通信できる環境なら、ダウンロード〜生成を自動化できます。
+```bash
+node scripts/fetch-hoanrin.mjs --pref 13   # DL→展開→保安林抽出→data/hoanrin/13.geojson まで一括
+```
+> Claude Code on the web で使う場合は、環境設定の **Network access → Custom** で **Allowed domains** に
+> `nlftp.mlit.go.jp`（と住所検索用の `msearch.gsi.go.jp`）を追加し、
+> 「Also include default list of common package managers」も有効にしてください。
+
+**手動で用意する場合**:
 1. [国土数値情報 森林地域データ(A13)](https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A13.html) を
    都道府県ごとにダウンロード（無償）して展開します。
 2. 保安林だけを抽出・簡略化して GeoJSON を生成します（`mapshaper` を npx で自動取得）:
@@ -99,6 +108,7 @@ vercel --prod                # 本番デプロイ
    # → data/hoanrin/13.geojson を生成（13 = 東京都）
    ```
    保安施設地区も含めたい場合は `--codes 3,4`、属性名が異なる年次では `--field <名>` で調整します。
+   （`node scripts/fetch-hoanrin.mjs --pref 13 --inspect` で属性名を確認できます）
 3. デプロイすると `/api/hoanrin?area=13&lat=..&lon=..` が参照します。
 
 > 大容量になる場合は生成した GeoJSON を CDN 等に置き、環境変数 `HOANRIN_DATA_BASE`
@@ -119,6 +129,7 @@ vercel --prod                # 本番デプロイ
 index.html              フロントエンド（単一ファイル・UI＋計算ロジック）
 api/reinfolib.js        中継サーバーレス関数（APIキーを保持・CORS対応・取引データ集計）
 api/hoanrin.js          保安林 判定サーバーレス関数（緯度経度→ポリゴン内包判定。APIキー不要）
+scripts/fetch-hoanrin.mjs A13をDL→展開→保安林GeoJSON生成まで一括するスクリプト
 scripts/build-hoanrin.mjs 国土数値情報A13から保安林GeoJSONを生成するスクリプト
 data/hoanrin/           保安林ポリゴン（都道府県コード別 GeoJSON。生成物を配置）
 ```
