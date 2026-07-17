@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/hoanrin.js": {
+      "includeFiles": "data/hoanrin/**"
+    }
+  }
+}
