@@ -1,0 +1,39 @@
+# プランA: 攻めつつ生存重視 (標準・推奨)
+#
+# 適用条件: ペーパートレード実測 Sharpe 0.5〜1.5
+# 狙い: 2028年末 中央値 120〜130万 / 100万超え確率 56〜70% / 破綻リスクほぼゼロ
+# 現物のみ。信用取引(1.5〜2倍)は証券会社API接続とマージン対応実装後に検討。
+
+universe:
+  - 7203.T   # トヨタ自動車
+  - 6758.T   # ソニーグループ
+  - 9984.T   # ソフトバンクグループ
+  - 8306.T   # 三菱UFJフィナンシャル・グループ
+  - 6501.T   # 日立製作所
+
+initial_capital: 500000
+
+data:
+  lookback_days: 400
+  interval: "1d"
+
+risk:
+  max_position_weight: 0.25   # 資金50万では分散に限界があるため1銘柄25%まで許容
+  max_gross_exposure: 0.95
+  stop_loss_pct: 0.10
+  take_profit_pct: 0.25
+  max_daily_var_pct: 0.035
+  risk_free_rate: 0.001
+
+strategy:
+  momentum_weight: 0.6
+  mean_reversion_weight: 0.4
+  buy_threshold: 0.30
+  sell_threshold: -0.35
+
+execution:
+  mode: paper
+  commission_pct: 0.0005
+  slippage_pct: 0.0005
+
+state_file: state/portfolio.json

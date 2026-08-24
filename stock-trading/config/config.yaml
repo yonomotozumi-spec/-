@@ -9,7 +9,7 @@ universe:
   - 6501.T   # 日立製作所
 
 # 初期資金 (円)
-initial_capital: 3000000
+initial_capital: 500000
 
 # データ取得
 data:
@@ -18,8 +18,8 @@ data:
 
 # リスク管理
 risk:
-  max_position_weight: 0.20   # 1銘柄あたり最大20%
-  max_gross_exposure: 0.90    # 株式合計は資産の90%まで (現金10%を常に確保)
+  max_position_weight: 0.25   # 資金50万では分散に限界があるため25%まで許容
+  max_gross_exposure: 0.95
   stop_loss_pct: 0.08         # 取得価格から-8%で損切り
   take_profit_pct: 0.20       # +20%で利確
   max_daily_var_pct: 0.03     # ポートフォリオ日次VaR(95%)は3%まで
@@ -29,7 +29,7 @@ risk:
 strategy:
   momentum_weight: 0.6
   mean_reversion_weight: 0.4
-  buy_threshold: 0.35         # 統合スコアがこれ以上でBUY
+  buy_threshold: 0.30
   sell_threshold: -0.35       # これ以下でSELL
 
 # 執行

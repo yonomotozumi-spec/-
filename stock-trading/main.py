@@ -60,17 +60,97 @@ def print_summary(s: dict) -> None:
             print("    ⚠ ポートフォリオVaRが許容上限を超えています。エクスポージャー削減を検討してください")
 
 
+def measure(cfg) -> None:
+    """ペーパートレードの実測パフォーマンスを評価し、プラン判定の目安を出す"""
+    import os
+
+    import pandas as pd
+
+    from autotrader.risk.metrics import summarize
+
+    log_path = os.path.join(os.path.dirname(cfg.state_file) or ".", "equity_log.csv")
+    if not os.path.exists(log_path):
+        print("equity_log.csv がまだありません。`python main.py run` を数日分実行してください")
+        return
+    df = pd.read_csv(log_path, parse_dates=["date"]).set_index("date").sort_index()
+    returns = df["equity"].pct_change().dropna()
+    n = len(returns)
+    print(f"=== ペーパートレード実測 ({df.index[0].date()} 〜 {df.index[-1].date()}, {n}営業日分) ===")
+    print(f"  資産推移: {df['equity'].iloc[0]:,.0f} → {df['equity'].iloc[-1]:,.0f} 円 "
+          f"({(df['equity'].iloc[-1] / df['equity'].iloc[0] - 1) * 100:+.2f}%)")
+    if n < 2:
+        print("  リターン系列が短すぎるため指標は未算出です")
+        return
+    s = summarize(returns, cfg.risk.risk_free_rate)
+    print(f"  年率換算: リターン {s['annual_return']:+.1%} / ボラ {s['annual_volatility']:.1%} / "
+          f"シャープ {s['sharpe']:.2f}")
+    print(f"  最大DD {s['max_drawdown']:.1%} / 日次VaR95 {s['var_95']:.2%}")
+    print()
+    if n < 15:
+        print("  [判定] サンプル不足 (15営業日以上の計測を推奨)。このまま計測を継続")
+    elif s["sharpe"] >= 1.5:
+        print("  [判定] 実測Sharpe >= 1.5: プランB (config/planB.yaml) を検討可能な水準")
+    elif s["sharpe"] >= 0.5:
+        print("  [判定] 実測Sharpe 0.5〜1.5: プランA (標準設定) で継続が妥当")
+    else:
+        print("  [判定] 実測Sharpe < 0.5: エッジ不十分。戦略パラメータの見直しを推奨")
+
+
+def write_backtest_report(path: str, cfg, result) -> None:
+    import os
+
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    m = result.metrics
+    period = f"{result.equity_curve.index[0].date()} 〜 {result.equity_curve.index[-1].date()}"
+    lines = [
+        "# 実データバックテスト結果",
+        "",
+        f"- 対象銘柄: {', '.join(cfg.universe)}",
+        f"- 検証期間: {period}",
+        f"- 初期資金: {cfg.initial_capital:,.0f} 円",
+        "",
+        "| 指標 | 値 |",
+        "|---|---|",
+        f"| 最終資産 | {result.final_equity:,.0f} 円 ({(result.final_equity / cfg.initial_capital - 1) * 100:+.2f}%) |",
+        f"| 年率リターン | {m['annual_return']:+.2%} |",
+        f"| 年率ボラティリティ | {m['annual_volatility']:.2%} |",
+        f"| シャープレシオ | {m['sharpe']:.2f} |",
+        f"| ソルティノレシオ | {m['sortino']:.2f} |",
+        f"| 最大ドローダウン | {m['max_drawdown']:.2%} |",
+        f"| 日次VaR(95%) | {m['var_95']:.2%} |",
+        f"| 日次CVaR(95%) | {m['cvar_95']:.2%} |",
+        f"| 取引回数 | {len(result.trades)} 回 |",
+        "",
+    ]
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    print(f"レポートを書き出しました: {path}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="株式自動取引システム")
-    parser.add_argument("command", choices=["advise", "run", "backtest", "report"])
+    parser.add_argument("command", choices=["advise", "run", "backtest", "report", "measure"])
     parser.add_argument("--config", default=None, help="設定ファイルのパス")
     parser.add_argument("--start", default=None, help="バックテスト開始日 (YYYY-MM-DD)")
+    parser.add_argument("--out", default=None, help="バックテスト結果のMarkdown出力先")
     parser.add_argument("--json", action="store_true", help="JSON形式で出力")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
+
+    if args.command == "measure":
+        measure(cfg)
+        return
+
+    lookback = cfg.data.lookback_days
+    if args.command == "backtest" and args.start:
+        import datetime as dt
+
+        since = (dt.date.today() - dt.date.fromisoformat(args.start)).days
+        lookback = max(lookback, since + 150)  # 指標ウォームアップ分を上乗せ
+
     print(f"マーケットデータ収集中... ({len(cfg.universe)}銘柄)")
-    data = collect_market_data(cfg.universe, cfg.data.lookback_days, cfg.data.interval)
+    data = collect_market_data(cfg.universe, lookback, cfg.data.interval)
     if not data:
         raise SystemExit("エラー: 全銘柄のデータ取得に失敗しました。ネットワークを確認してください")
 
@@ -108,6 +188,8 @@ def main() -> None:
         print(f"  最大DD {m['max_drawdown']:.1%} / 日次VaR95 {m['var_95']:.2%} / "
               f"CVaR95 {m['cvar_95']:.2%}")
         print(f"  取引回数:   {len(result.trades)} 回")
+        if args.out:
+            write_backtest_report(args.out, cfg, result)
 
 
 if __name__ == "__main__":

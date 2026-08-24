@@ -121,7 +121,25 @@ class TradingManager:
 
         if execute and self.persist_state:
             self.portfolio.save(self.cfg.state_file)
+            self._append_equity_log(date, result.portfolio_summary.get("equity", 0))
         return result
+
+    def _append_equity_log(self, date: str, equity: float) -> None:
+        """日次資産推移を equity_log.csv に追記する (同日分は上書き)"""
+        import csv
+        import os
+
+        path = os.path.join(os.path.dirname(self.cfg.state_file) or ".", "equity_log.csv")
+        rows: list[list[str]] = []
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                rows = [r for r in csv.reader(f) if r and r[0] not in ("date", date)]
+        rows.append([date, f"{equity:.0f}", f"{self.portfolio.cash:.0f}"])
+        rows.sort(key=lambda r: r[0])
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["date", "equity", "cash"])
+            w.writerows(rows)
 
     # ------------------------------------------------------------------
     def _execute(self, inst: Instruction, date: str) -> None:
