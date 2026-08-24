@@ -62,10 +62,13 @@ class TradingManager:
         market_data: dict[str, pd.DataFrame],
         execute: bool = True,
         as_of: str | None = None,
+        buy_allowed: set[str] | None = None,
     ) -> CycleResult:
         """1営業日分の判断サイクルを実行する。
 
         execute=False の場合は指示の生成のみ行う (advise モード)。
+        buy_allowed を指定すると、新規買いはその銘柄に限定する
+        (ユニバース外になった保有銘柄は売り判定のみ行われる)。
         """
         date = as_of or dt.date.today().isoformat()
         result = CycleResult(date=date)
@@ -99,6 +102,8 @@ class TradingManager:
                     f"売りシグナル {sig.score:+.2f} {sig.reason}",
                 )
             elif sig.action == "BUY":
+                if buy_allowed is not None and ticker not in buy_allowed:
+                    continue
                 decision = self.risk.size_buy(
                     self.portfolio, ticker, price, sig.score, df["ret_1d"],
                     lot_size=self.cfg.execution.lot_size,

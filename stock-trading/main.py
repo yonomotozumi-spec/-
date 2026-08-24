@@ -127,19 +127,75 @@ def write_backtest_report(path: str, cfg, result) -> None:
     print(f"レポートを書き出しました: {path}")
 
 
+def screen(cfg, if_stale: bool) -> None:
+    """候補プールをスクリーニングして売買ユニバースを選定・保存する"""
+    from autotrader.screener import screener as sc
+
+    age = sc.universe_age_days(cfg.screener.universe_file)
+    if if_stale and age is not None and age < cfg.screener.refresh_days:
+        print(f"ユニバースは選定から{age}日のためスキップ (再選定は{cfg.screener.refresh_days}日毎)")
+        return
+
+    candidates = sc.load_candidates(cfg.screener.candidates_file)
+    print(f"候補 {len(candidates)}銘柄のデータ収集中...")
+    data = collect_market_data([c.ticker for c in candidates], 300, cfg.data.interval)
+
+    results = []
+    for cand in candidates:
+        if cand.ticker not in data:
+            continue
+        results.append(sc.evaluate_candidate(cand, data[cand.ticker], cfg.screener))
+    selected = sc.select_universe(results, cfg.screener)
+    sc.save_universe(cfg.screener.universe_file, selected)
+
+    print(f"\n=== ユニバース選定結果 ({len(selected)}/{len(results)}銘柄) ===")
+    for r in sorted(results, key=lambda r: r.score, reverse=True)[:15]:
+        mark = "★採用" if r.selected else "  ----"
+        print(f"  {mark} {r.ticker:8s} [{r.sector}] score={r.score:+.2f}  {r.reason}")
+
+
+def resolve_universe(cfg) -> tuple[list[str], set[str] | None]:
+    """設定とスクリーニング結果から (データ取得銘柄, 買い許可銘柄) を決める
+
+    スクリーニング有効時は選定済みユニバースを採用し、保有中でユニバース外に
+    なった銘柄もデータ取得対象に含める (売り判定を継続するため)。
+    """
+    from autotrader.portfolio.portfolio import Portfolio
+    from autotrader.screener import screener as sc
+
+    if not cfg.screener.enabled:
+        return list(cfg.universe), None
+    saved = sc.load_universe(cfg.screener.universe_file)
+    if not saved or not saved.get("tickers"):
+        print("[warn] スクリーニング未実行のため設定ファイルのユニバースを使用します")
+        return list(cfg.universe), None
+    universe = list(saved["tickers"])
+    held = list(Portfolio.load(cfg.state_file, cfg.initial_capital).positions)
+    fetch = universe + [t for t in held if t not in universe]
+    print(f"ユニバース (選定日 {saved['as_of']}): {', '.join(universe)}")
+    return fetch, set(universe)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="株式自動取引システム")
-    parser.add_argument("command", choices=["advise", "run", "backtest", "report", "measure"])
+    parser.add_argument(
+        "command", choices=["advise", "run", "backtest", "report", "measure", "screen"]
+    )
     parser.add_argument("--config", default=None, help="設定ファイルのパス")
     parser.add_argument("--start", default=None, help="バックテスト開始日 (YYYY-MM-DD)")
     parser.add_argument("--out", default=None, help="バックテスト結果のMarkdown出力先")
     parser.add_argument("--json", action="store_true", help="JSON形式で出力")
+    parser.add_argument("--if-stale", action="store_true",
+                        help="screen: ユニバースが新しければ再選定しない")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
 
     if args.command == "measure":
         measure(cfg)
+        return
+    if args.command == "screen":
+        screen(cfg, args.if_stale)
         return
 
     lookback = cfg.data.lookback_days
@@ -149,14 +205,22 @@ def main() -> None:
         since = (dt.date.today() - dt.date.fromisoformat(args.start)).days
         lookback = max(lookback, since + 150)  # 指標ウォームアップ分を上乗せ
 
-    print(f"マーケットデータ収集中... ({len(cfg.universe)}銘柄)")
-    data = collect_market_data(cfg.universe, lookback, cfg.data.interval)
+    if args.command == "backtest":
+        # 現時点のスクリーニング結果を過去に適用すると先読みバイアスになるため、
+        # バックテストは設定ファイルの静的ユニバースのみ使用する
+        fetch_tickers, buy_allowed = list(cfg.universe), None
+    else:
+        fetch_tickers, buy_allowed = resolve_universe(cfg)
+    print(f"マーケットデータ収集中... ({len(fetch_tickers)}銘柄)")
+    data = collect_market_data(fetch_tickers, lookback, cfg.data.interval)
     if not data:
         raise SystemExit("エラー: 全銘柄のデータ取得に失敗しました。ネットワークを確認してください")
 
     if args.command in ("advise", "run"):
         manager = TradingManager(cfg)
-        result = manager.run_cycle(data, execute=(args.command == "run"))
+        result = manager.run_cycle(
+            data, execute=(args.command == "run"), buy_allowed=buy_allowed
+        )
         if args.json:
             print(json.dumps(
                 {

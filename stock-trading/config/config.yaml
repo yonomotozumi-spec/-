@@ -41,3 +41,13 @@ execution:
 
 # 状態保存
 state_file: state/portfolio.json
+
+# 銘柄スクリーニング (候補プールから月次でユニバースを自動選定)
+screener:
+  enabled: true
+  candidates_file: config/candidates.yaml
+  target_count: 8             # 採用銘柄数
+  min_turnover_jpy: 1000000000  # 60日平均売買代金 10億円/日 以上
+  max_per_sector: 2           # 同一セクターは2銘柄まで
+  refresh_days: 30            # 30日毎に再選定
+  universe_file: state/universe.json

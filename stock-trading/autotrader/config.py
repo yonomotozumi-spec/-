@@ -46,6 +46,17 @@ class DataConfig:
 
 
 @dataclass
+class ScreenerConfig:
+    enabled: bool = False
+    candidates_file: str = "config/candidates.yaml"
+    target_count: int = 8              # 選定する銘柄数
+    min_turnover_jpy: float = 1.0e9    # 60日平均売買代金の下限 (円)
+    max_per_sector: int = 2            # 同一セクターの採用上限
+    refresh_days: int = 30             # ユニバースの再選定間隔 (日)
+    universe_file: str = "state/universe.json"
+
+
+@dataclass
 class Config:
     universe: list[str] = field(default_factory=list)
     initial_capital: float = 3_000_000
@@ -53,6 +64,7 @@ class Config:
     risk: RiskConfig = field(default_factory=RiskConfig)
     strategy: StrategyConfig = field(default_factory=StrategyConfig)
     execution: ExecutionConfig = field(default_factory=ExecutionConfig)
+    screener: ScreenerConfig = field(default_factory=ScreenerConfig)
     state_file: str = "state/portfolio.json"
 
 
@@ -68,6 +80,7 @@ def load_config(path: str | None = None) -> Config:
         risk=RiskConfig(**raw.get("risk", {})),
         strategy=StrategyConfig(**raw.get("strategy", {})),
         execution=ExecutionConfig(**raw.get("execution", {})),
+        screener=ScreenerConfig(**raw.get("screener", {})),
         state_file=raw.get("state_file", "state/portfolio.json"),
     )
     if cfg.execution.mode != "paper":
