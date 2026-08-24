@@ -7,6 +7,10 @@ on:
         description: "バックテスト開始日 (YYYY-MM-DD)"
         required: false
         default: "2023-09-01"
+  push:
+    # ブランチ上から起動する場合は .trigger-backtest を更新してpushする
+    branches: ["claude/stock-auto-trading-system-neb2u1"]
+    paths: ["stock-trading/.trigger-backtest"]
 
 permissions:
   contents: write

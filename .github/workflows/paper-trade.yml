@@ -5,6 +5,10 @@ on:
   schedule:
     # 平日 16:15 JST (東証引け後) — スケジュール起動はデフォルトブランチのみ有効
     - cron: "15 7 * * 1-5"
+  push:
+    # ブランチ上から起動する場合は .trigger-paper-trade を更新してpushする
+    branches: ["claude/stock-auto-trading-system-neb2u1"]
+    paths: ["stock-trading/.trigger-paper-trade"]
 
 permissions:
   contents: write
