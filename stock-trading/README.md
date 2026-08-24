@@ -79,6 +79,25 @@ python main.py backtest --start 2023-01-01
 python main.py report
 ```
 
+### 5. ペーパートレード実測パフォーマンスの評価
+
+```bash
+python main.py measure
+```
+
+`state/equity_log.csv`（`run` 実行時に自動追記）から実測の年率リターン・シャープレシオを計算し、
+リスク設定プラン（`config/planA.yaml` / `planB.yaml`）の判定目安を表示します。
+
+## CI による自動運用（GitHub Actions）
+
+| ワークフロー | 起動方法 | 内容 |
+|---|---|---|
+| `Paper Trade Daily` | 平日16:15 JST自動（デフォルトブランチ）/ `.trigger-paper-trade` 更新push | 日次売買サイクルを実行し `state/` をコミット |
+| `Backtest Real Data` | 手動 / `.trigger-backtest` 更新push | 実データでバックテストし `reports/backtest-latest.md` を更新 |
+
+売買単位は既定で1株（`execution.lot_size: 1`）です。資金50万円では東証の100株単元が
+配分上限内に収まらないため、単元未満株（SBIのS株・楽天のかぶミニ等）での運用を前提にしています。
+
 ## 設定 (`config/config.yaml`)
 
 | キー | 説明 |
