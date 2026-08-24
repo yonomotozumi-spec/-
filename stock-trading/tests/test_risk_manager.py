@@ -52,3 +52,12 @@ def test_size_buy_rejects_tiny_budget():
     p = Portfolio(cash=50_000)  # 100株単位に届かない
     d = rm.size_buy(p, "X", price=2000, signal_score=1.0)
     assert not d.approved
+
+
+def test_size_buy_fractional_lot_allows_small_budget():
+    # 単元未満株 (lot_size=1) なら資金50万でも高価格銘柄を買える
+    rm = make_rm(max_position_weight=0.25)
+    p = Portfolio(cash=500_000)
+    d = rm.size_buy(p, "X", price=13_000, signal_score=1.0, lot_size=1)
+    assert d.approved
+    assert 1 <= d.quantity * 13_000 <= 500_000 * 0.25 + 13_000

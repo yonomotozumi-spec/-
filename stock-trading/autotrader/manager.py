@@ -100,7 +100,8 @@ class TradingManager:
                 )
             elif sig.action == "BUY":
                 decision = self.risk.size_buy(
-                    self.portfolio, ticker, price, sig.score, df["ret_1d"]
+                    self.portfolio, ticker, price, sig.score, df["ret_1d"],
+                    lot_size=self.cfg.execution.lot_size,
                 )
                 if not decision.approved:
                     result.warnings.append(f"{ticker}: 買い見送り ({decision.reason})")

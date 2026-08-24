@@ -34,6 +34,7 @@ strategy:
 execution:
   mode: paper
   commission_pct: 0.0005
-  slippage_pct: 0.0005
+  slippage_pct: 0.0022      # 単元未満株のスプレッド相当 (楽天かぶミニ0.22%を想定した保守値)
+  lot_size: 1                 # 1株単位 (SBI S株・楽天かぶミニ等の単元未満株を前提)
 
 state_file: state/portfolio.json

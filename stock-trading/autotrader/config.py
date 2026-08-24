@@ -35,6 +35,8 @@ class ExecutionConfig:
     mode: str = "paper"
     commission_pct: float = 0.0005
     slippage_pct: float = 0.0005
+    # 売買単位。100=単元株のみ / 1=単元未満株 (SBI S株・楽天かぶミニ等) 前提
+    lot_size: int = 100
 
 
 @dataclass
