@@ -54,6 +54,10 @@ class ScreenerConfig:
     max_per_sector: int = 2            # 同一セクターの採用上限
     refresh_days: int = 30             # ユニバースの再選定間隔 (日)
     universe_file: str = "state/universe.json"
+    # 単元(100株)の取得コスト上限 (円)。0=無効。
+    # 単元株モード (execution.lot_size>=100) では未設定時に
+    # 「初期資金 × 1銘柄配分上限」が自動適用される
+    max_unit_cost_jpy: float = 0
 
 
 @dataclass

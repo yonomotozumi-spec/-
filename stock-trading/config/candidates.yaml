@@ -64,3 +64,88 @@ candidates:
   # エネルギー
   - { ticker: 5020.T, sector: エネルギー }  # ENEOS HD
   - { ticker: 1605.T, sector: エネルギー }  # INPEX
+  # --- 拡張プール (2026-08-26 追加) ---
+  # サービス・情報
+  - { ticker: 6098.T, sector: サービス }    # リクルートHD
+  - { ticker: 4661.T, sector: サービス }    # オリエンタルランド
+  - { ticker: 2413.T, sector: サービス }    # エムスリー
+  - { ticker: 4755.T, sector: サービス }    # 楽天グループ
+  - { ticker: 9735.T, sector: サービス }    # セコム
+  - { ticker: 4324.T, sector: サービス }    # 電通グループ
+  # ゲーム・エンタメ
+  - { ticker: 7974.T, sector: ゲーム }      # 任天堂
+  - { ticker: 7832.T, sector: ゲーム }      # バンダイナムコHD
+  - { ticker: 9766.T, sector: ゲーム }      # コナミグループ
+  - { ticker: 9684.T, sector: ゲーム }      # スクウェア・エニックスHD
+  - { ticker: 3659.T, sector: ゲーム }      # ネクソン
+  # 金融・保険 (追加)
+  - { ticker: 8308.T, sector: 金融 }        # りそなHD
+  - { ticker: 8309.T, sector: 金融 }        # 三井住友トラストG
+  - { ticker: 8697.T, sector: 金融 }        # 日本取引所グループ
+  - { ticker: 7182.T, sector: 金融 }        # ゆうちょ銀行
+  - { ticker: 8630.T, sector: 保険 }        # SOMPOホールディングス
+  - { ticker: 8725.T, sector: 保険 }        # MS&ADインシュアランス
+  - { ticker: 8750.T, sector: 保険 }        # 第一生命HD
+  # 半導体・電子部品 (追加)
+  - { ticker: 6920.T, sector: 半導体 }      # レーザーテック
+  - { ticker: 7735.T, sector: 半導体 }      # SCREENホールディングス
+  - { ticker: 6963.T, sector: 半導体 }      # ローム
+  - { ticker: 6526.T, sector: 半導体 }      # ソシオネクスト
+  - { ticker: 6762.T, sector: 電子部品 }    # TDK
+  - { ticker: 6971.T, sector: 電子部品 }    # 京セラ
+  - { ticker: 6988.T, sector: 電子部品 }    # 日東電工
+  # 電機・精密 (追加)
+  - { ticker: 6752.T, sector: 電機 }        # パナソニックHD
+  - { ticker: 6645.T, sector: 電機 }        # オムロン
+  - { ticker: 7733.T, sector: 精密 }        # オリンパス
+  - { ticker: 4543.T, sector: 精密 }        # テルモ
+  # 自動車 (追加)
+  - { ticker: 7261.T, sector: 自動車 }      # マツダ
+  - { ticker: 7270.T, sector: 自動車 }      # SUBARU
+  - { ticker: 7202.T, sector: 自動車 }      # いすゞ自動車
+  - { ticker: 5108.T, sector: ゴム }        # ブリヂストン
+  # 機械 (追加)
+  - { ticker: 6273.T, sector: 機械 }        # SMC
+  - { ticker: 6326.T, sector: 機械 }        # クボタ
+  - { ticker: 7012.T, sector: 機械 }        # 川崎重工業
+  - { ticker: 7013.T, sector: 機械 }        # IHI
+  # 化学・素材 (追加)
+  - { ticker: 3402.T, sector: 化学 }        # 東レ
+  - { ticker: 4188.T, sector: 化学 }        # 三菱ケミカルG
+  - { ticker: 4005.T, sector: 化学 }        # 住友化学
+  - { ticker: 4183.T, sector: 化学 }        # 三井化学
+  - { ticker: 5411.T, sector: 鉄鋼 }        # JFEホールディングス
+  - { ticker: 5713.T, sector: 非鉄 }        # 住友金属鉱山
+  - { ticker: 5802.T, sector: 非鉄 }        # 住友電気工業
+  - { ticker: 5801.T, sector: 非鉄 }        # 古河電気工業
+  # 医薬 (追加)
+  - { ticker: 4507.T, sector: 医薬 }        # 塩野義製薬
+  - { ticker: 4523.T, sector: 医薬 }        # エーザイ
+  - { ticker: 4578.T, sector: 医薬 }        # 大塚HD
+  # 食品 (追加)
+  - { ticker: 2502.T, sector: 食品 }        # アサヒグループHD
+  - { ticker: 2503.T, sector: 食品 }        # キリンHD
+  - { ticker: 2801.T, sector: 食品 }        # キッコーマン
+  - { ticker: 2269.T, sector: 食品 }        # 明治HD
+  # 小売 (追加)
+  - { ticker: 9843.T, sector: 小売 }        # ニトリHD
+  - { ticker: 8267.T, sector: 小売 }        # イオン
+  # 運輸・空運 (追加)
+  - { ticker: 9104.T, sector: 海運 }        # 商船三井
+  - { ticker: 9107.T, sector: 海運 }        # 川崎汽船
+  - { ticker: 9021.T, sector: 陸運 }        # JR西日本
+  - { ticker: 9020.T, sector: 陸運 }        # JR東日本
+  - { ticker: 9201.T, sector: 空運 }        # 日本航空
+  - { ticker: 9202.T, sector: 空運 }        # ANAホールディングス
+  # 電力・ガス
+  - { ticker: 9501.T, sector: 電力 }        # 東京電力HD
+  - { ticker: 9503.T, sector: 電力 }        # 関西電力
+  - { ticker: 9531.T, sector: ガス }        # 東京ガス
+  # 建設・不動産 (追加)
+  - { ticker: 1801.T, sector: 建設 }        # 大成建設
+  - { ticker: 1812.T, sector: 建設 }        # 鹿島建設
+  - { ticker: 1928.T, sector: 建設 }        # 積水ハウス
+  - { ticker: 8802.T, sector: 不動産 }      # 三菱地所
+  - { ticker: 8830.T, sector: 不動産 }      # 住友不動産
+  # 郵政
+  - { ticker: 6178.T, sector: 金融 }        # 日本郵政

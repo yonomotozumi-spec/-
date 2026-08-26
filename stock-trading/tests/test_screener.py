@@ -78,3 +78,24 @@ def test_save_and_load_universe(tmp_path):
     assert loaded["tickers"] == ["UP"]
     assert loaded["as_of"] == "2026-08-24"
     assert universe_age_days(path) >= 0
+
+
+def test_unit_cost_filter_excludes_expensive_stocks():
+    # 単元コスト上限37.5万: 株価2000円(単元20万)は通過、株価13000円(単元130万)は除外
+    c = cfg(max_unit_cost_jpy=375_000)
+    cheap = evaluate_candidate(Candidate("CHEAP", "A"), make_df(0.003, 1), c)
+    exp_df = make_df(0.003, 1)
+    for col in ("open", "high", "low", "close", "bb_upper", "bb_lower",
+                "sma_short", "sma_long", "atr"):
+        exp_df[col] = exp_df[col] * 6.5
+    expensive = evaluate_candidate(Candidate("EXP", "A"), exp_df, c)
+    assert cheap.score != float("-inf")
+    assert expensive.score == float("-inf")
+    assert "単元コスト超過" in expensive.reason
+
+
+def test_unit_cost_filter_disabled_by_default():
+    c = cfg()  # max_unit_cost_jpy=0
+    exp_df = make_df(0.003, 1)
+    r = evaluate_candidate(Candidate("EXP", "A"), exp_df, c)
+    assert r.score != float("-inf")

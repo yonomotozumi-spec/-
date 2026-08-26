@@ -136,6 +136,11 @@ def screen(cfg, if_stale: bool) -> None:
         print(f"ユニバースは選定から{age}日のためスキップ (再選定は{cfg.screener.refresh_days}日毎)")
         return
 
+    # 単元株モードでは、予算内で単元が買えない銘柄をスクリーニングで除外する
+    if cfg.execution.lot_size >= 100 and cfg.screener.max_unit_cost_jpy <= 0:
+        cfg.screener.max_unit_cost_jpy = cfg.initial_capital * cfg.risk.max_position_weight
+        print(f"単元株モード: 単元コスト上限 {cfg.screener.max_unit_cost_jpy / 1e4:,.0f}万円/銘柄")
+
     candidates = sc.load_candidates(cfg.screener.candidates_file)
     print(f"候補 {len(candidates)}銘柄のデータ収集中...")
     data = collect_market_data([c.ticker for c in candidates], 300, cfg.data.interval)

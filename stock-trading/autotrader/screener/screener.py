@@ -59,6 +59,13 @@ def evaluate_candidate(cand: Candidate, df: pd.DataFrame, cfg: ScreenerConfig) -
         base.reason = f"流動性不足 (売買代金 {turnover / 1e8:.1f}億円/日)"
         return base
 
+    # 単元コストフィルタ: 100株単元が予算内で買えない銘柄を除外 (単元株モード用)
+    if cfg.max_unit_cost_jpy > 0:
+        unit_cost = float(close.iloc[-1]) * 100
+        if unit_cost > cfg.max_unit_cost_jpy:
+            base.reason = f"単元コスト超過 ({unit_cost / 1e4:,.0f}万円/単元)"
+            return base
+
     mom = float(close.iloc[-1] / close.iloc[-120] - 1)
     vol = float(df["ret_1d"].tail(120).std() * (252**0.5))
     base.momentum_120d = mom

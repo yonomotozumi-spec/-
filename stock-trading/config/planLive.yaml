@@ -1,0 +1,46 @@
+# 実弾想定プロファイル: 資金150万・単元株(100株)モード
+#
+# 三菱UFJ eスマート証券 kabuステーションAPI での実運用を想定した並行ペーパー計測用。
+# APIは単元株(100株単位)のみ発注可能なため、スクリーニング時に
+# 「単元コスト <= 初期資金×配分上限 (=37.5万円)」の銘柄に自動限定される。
+# 状態は state/live/ 配下に分離し、1株運用(プランA)と成績を比較する。
+
+universe: []   # スクリーニングで自動選定 (screener.enabled: true)
+
+initial_capital: 1500000
+
+data:
+  lookback_days: 400
+  interval: "1d"
+
+risk:
+  max_position_weight: 0.25   # 1銘柄予算 37.5万円
+  max_gross_exposure: 0.95
+  stop_loss_pct: 0.08
+  take_profit_pct: 0.20
+  max_daily_var_pct: 0.03
+  risk_free_rate: 0.001
+
+strategy:
+  momentum_weight: 0.6
+  mean_reversion_weight: 0.4
+  buy_threshold: 0.30
+  sell_threshold: -0.35
+
+execution:
+  mode: paper
+  commission_pct: 0.001       # kabuステーション現物手数料相当の保守値
+  slippage_pct: 0.0005        # 取引所執行のためスプレッド影響は小さい
+  lot_size: 100               # 単元株のみ (kabuステーションAPIの制約)
+
+screener:
+  enabled: true
+  candidates_file: config/candidates.yaml
+  target_count: 8
+  min_turnover_jpy: 1000000000
+  max_per_sector: 2
+  refresh_days: 30
+  universe_file: state/live/universe.json
+  # max_unit_cost_jpy は未指定 → lot_size>=100 のため 150万×25%=37.5万 が自動適用
+
+state_file: state/live/portfolio.json
