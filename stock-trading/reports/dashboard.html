@@ -1,0 +1,110 @@
+<title>株自動運用ボード</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700&display=swap">
+<style>
+:root {
+  --bg:#F4F6F9; --surface:#FFFFFF; --ink:#1B2537; --muted:#5B6578; --muted2:#8A94A8;
+  --grid:#E3E7EF; --border:#DDE2EB; --acc:#3E63DD; --teal:#0F8C7E; --crit:#C43D3D;
+  --good:#1F7A4D; --warn:#A06A1B; --pos:#1F7A4D; --neg:#C43D3D; --chip:#EDF0F7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#12151C; --surface:#1B2029; --ink:#E7EAF2; --muted:#9AA4B8; --muted2:#6B7690;
+    --grid:#2A303D; --border:#323949; --acc:#7B96F4; --teal:#3AC0B0; --crit:#E06C6C;
+    --good:#4FBF8B; --warn:#D8A04A; --pos:#4FBF8B; --neg:#E06C6C; --chip:#252B38;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#12151C; --surface:#1B2029; --ink:#E7EAF2; --muted:#9AA4B8; --muted2:#6B7690;
+  --grid:#2A303D; --border:#323949; --acc:#7B96F4; --teal:#3AC0B0; --crit:#E06C6C;
+  --good:#4FBF8B; --warn:#D8A04A; --pos:#4FBF8B; --neg:#E06C6C; --chip:#252B38;
+}
+* { box-sizing:border-box }
+body { background:var(--bg); color:var(--ink); font-family:'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif; margin:0; line-height:1.6; }
+.wrap { max-width:1000px; margin:0 auto; padding:28px 20px 60px; }
+h1 { font-family:'Zen Kaku Gothic New','Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif; font-size:1.5rem; margin:0; letter-spacing:.02em; }
+h2 { font-family:'Zen Kaku Gothic New','Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif; font-size:1.05rem; margin:36px 0 12px; }
+.head { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+.chip { background:var(--chip); border:1px solid var(--border); border-radius:99px; padding:2px 12px; font-size:.78rem; color:var(--muted); }
+.updated { color:var(--muted2); font-size:.8rem; margin-left:auto; }
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-top:18px; }
+.tile { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+.t-label { font-size:.75rem; color:var(--muted); letter-spacing:.04em; }
+.t-value { font-size:1.45rem; font-weight:700; font-variant-numeric:tabular-nums; margin-top:2px; }
+.t-sub { font-size:.78rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+.tile.good .t-value { color:var(--good) } .tile.warn .t-value { color:var(--warn) }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px; }
+.ax { font-size:11px; fill:var(--muted2); font-family:'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif; }
+.dl { font-size:12px; font-weight:700; font-family:'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif; }
+.rl { font-size:11px; font-family:'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif; }
+.tblwrap { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; font-size:.85rem; }
+th { text-align:left; color:var(--muted); font-weight:500; font-size:.75rem; border-bottom:1px solid var(--border); padding:6px 10px; }
+td { padding:7px 10px; border-bottom:1px solid var(--grid); }
+.num { text-align:right; font-variant-numeric:tabular-nums; }
+.pos { color:var(--pos) } .neg { color:var(--neg) } .muted { color:var(--muted2); font-size:.85em }
+.pill { border-radius:5px; padding:1px 8px; font-size:.75rem; color:#fff; }
+.pill.buy { background:var(--acc) } .pill.sell { background:var(--crit) }
+.reason { color:var(--muted); font-size:.78rem; }
+.bar { display:inline-block; width:120px; height:8px; background:var(--chip); border-radius:99px; vertical-align:middle; margin-right:8px; }
+.fill { height:100%; background:var(--acc); border-radius:99px; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:760px) { .grid2 { grid-template-columns:1fr } }
+.note { color:var(--muted); font-size:.8rem; margin-top:28px; border-top:1px solid var(--border); padding-top:12px; }
+</style>
+<div class="wrap">
+  <div class="head">
+    <h1>株自動運用ボード</h1>
+    <span class="chip">ペーパー計測 4日目</span>
+    <span class="chip">スイング・現物</span>
+    <span class="updated">2026-08-27 16:20 JST 更新</span>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="t-label">単元株トラック 総資産 (実弾想定150万)</div><div class="t-value">1,492,676円</div><div class="t-sub">累積 -0.49% / 2営業日</div></div>
+    <div class="tile neg"><div class="t-label">対TO-BEペース (2026末165万への進捗線)</div><div class="t-value">-0.9万円</div><div class="t-sub">本日のペース基準 1,501,190円</div></div>
+    <div class="tile"><div class="t-label">1株トラック 総資産 (実力測定用)</div><div class="t-value">499,246円</div><div class="t-sub">累積 -0.15% / 4営業日</div></div>
+    <div class="tile"><div class="t-label">レバレッジ許可判定</div><div class="t-value">—</div><div class="t-sub">計測 4/15営業日 — 判定はサンプル15日以降</div></div>
+  </div>
+
+  <h2>AS-IS → TO-BE (単元株トラック・金額目標)</h2>
+  <div class="card">
+    <div class="tblwrap"><table>
+      <tr><th>マイルストーン</th><th>TO-BE</th><th>達成確率(試算)</th><th>進捗 (AS-IS: 1,492,676円)</th></tr>
+      <tr><td>2026年末<span class='muted'> (12/30)</span></td><td class='num'>1,650,000円</td><td class='num'>27%</td><td><div class='bar'><div class='fill' style='width:0.0%'></div></div><span class='muted'>0%</span></td></tr><tr><td>2027年末<span class='muted'> (12/30)</span></td><td class='num'>2,200,000円</td><td class='num'>28%</td><td><div class='bar'><div class='fill' style='width:0.0%'></div></div><span class='muted'>0%</span></td></tr><tr><td>2028年末<span class='muted'> (12/30)</span></td><td class='num'>3,000,000円</td><td class='num'>22%</td><td><div class='bar'><div class='fill' style='width:0.0%'></div></div><span class='muted'>0%</span></td></tr>
+    </table></div>
+    <p class="muted" style="margin:10px 0 0">
+      年内目標まで残り90営業日 / 必要ペース 日次+0.11% ・
+      撤退ライン 1,200,000円 (現在との差 29.3万円) ・
+      確率はモンテカルロ試算 (analysis/target_plan.py)
+    </p>
+  </div>
+
+  <h2>実績推移 — 単元株トラック vs TO-BEペース</h2>
+  <div class="card"><svg viewBox="0 0 860 300" role="img" style="width:100%;height:auto;display:block"><line x1="64" y1="270.0" x2="710" y2="270.0" stroke="var(--grid)" stroke-width="1"/><text x="56" y="274.0" text-anchor="end" class="ax">118万</text><line x1="64" y1="206.5" x2="710" y2="206.5" stroke="var(--grid)" stroke-width="1"/><text x="56" y="210.5" text-anchor="end" class="ax">130万</text><line x1="64" y1="143.0" x2="710" y2="143.0" stroke="var(--grid)" stroke-width="1"/><text x="56" y="147.0" text-anchor="end" class="ax">142万</text><line x1="64" y1="79.5" x2="710" y2="79.5" stroke="var(--grid)" stroke-width="1"/><text x="56" y="83.5" text-anchor="end" class="ax">155万</text><line x1="64" y1="16.0" x2="710" y2="16.0" stroke="var(--grid)" stroke-width="1"/><text x="56" y="20.0" text-anchor="end" class="ax">167万</text><text x="64.0" y="292" text-anchor="middle" class="ax">8/26</text><text x="94.8" y="292" text-anchor="middle" class="ax">9/1</text><text x="248.6" y="292" text-anchor="middle" class="ax">10/1</text><text x="407.5" y="292" text-anchor="middle" class="ax">11/1</text><text x="561.3" y="292" text-anchor="middle" class="ax">12/1</text><text x="710.0" y="292" text-anchor="middle" class="ax">12/30</text><line x1="64" y1="258.5" x2="710" y2="258.5" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="716" y="262.5" class="rl" fill="var(--crit)">撤退ライン 120万</text><path d="M64.0,104.5 L710.0,27.5" fill="none" stroke="var(--muted2)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="64.0" cy="104.5" r="4" fill="var(--muted2)" stroke="var(--surface)" stroke-width="2"><title>2026-08-26  1,500,000円</title></circle><circle cx="710.0" cy="27.5" r="4" fill="var(--muted2)" stroke="var(--surface)" stroke-width="2"><title>2026-12-30  1,650,000円</title></circle><text x="718.0" y="19.5" class="dl" fill="var(--muted2)">TO-BEペース 165.0万</text><path d="M64.0,105.6 L69.1,108.3" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="64.0" cy="105.6" r="4" fill="var(--acc)" stroke="var(--surface)" stroke-width="2"><title>2026-08-26  1,497,826円</title></circle><circle cx="69.1" cy="108.3" r="4" fill="var(--acc)" stroke="var(--surface)" stroke-width="2"><title>2026-08-27  1,492,676円</title></circle><text x="77.1" y="100.3" class="dl" fill="var(--acc)">実績 149.3万</text></svg></div>
+
+  <h2>実績推移 — 1株トラック (戦略の素の実力)</h2>
+  <div class="card"><svg viewBox="0 0 860 220" role="img" style="width:100%;height:auto;display:block"><line x1="64" y1="190.0" x2="710" y2="190.0" stroke="var(--grid)" stroke-width="1"/><text x="56" y="194.0" text-anchor="end" class="ax">39万</text><line x1="64" y1="146.5" x2="710" y2="146.5" stroke="var(--grid)" stroke-width="1"/><text x="56" y="150.5" text-anchor="end" class="ax">42万</text><line x1="64" y1="103.0" x2="710" y2="103.0" stroke="var(--grid)" stroke-width="1"/><text x="56" y="107.0" text-anchor="end" class="ax">45万</text><line x1="64" y1="59.5" x2="710" y2="59.5" stroke="var(--grid)" stroke-width="1"/><text x="56" y="63.5" text-anchor="end" class="ax">48万</text><line x1="64" y1="16.0" x2="710" y2="16.0" stroke="var(--grid)" stroke-width="1"/><text x="56" y="20.0" text-anchor="end" class="ax">51万</text><text x="64.0" y="212" text-anchor="middle" class="ax">8/24</text><text x="710.0" y="212" text-anchor="middle" class="ax">8/30</text><line x1="64" y1="24.2" x2="710" y2="24.2" stroke="var(--muted2)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="716" y="28.2" class="rl" fill="var(--muted2)">開始 50万</text><line x1="64" y1="182.1" x2="710" y2="182.1" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="6 4"/><text x="716" y="186.1" class="rl" fill="var(--crit)">撤退 40万</text><path d="M64.0,26.2 L171.7,23.9 L279.3,26.2 L387.0,25.4" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="64.0" cy="26.2" r="4" fill="var(--teal)" stroke="var(--surface)" stroke-width="2"><title>2026-08-24  498,719円</title></circle><circle cx="171.7" cy="23.9" r="4" fill="var(--teal)" stroke="var(--surface)" stroke-width="2"><title>2026-08-25  500,167円</title></circle><circle cx="279.3" cy="26.2" r="4" fill="var(--teal)" stroke="var(--surface)" stroke-width="2"><title>2026-08-26  498,714円</title></circle><circle cx="387.0" cy="25.4" r="4" fill="var(--teal)" stroke="var(--surface)" stroke-width="2"><title>2026-08-27  499,246円</title></circle><text x="395.0" y="17.4" class="dl" fill="var(--teal)">実績 49.9万</text></svg>
+    <p class="muted" style="margin:10px 0 0">
+      実測(年率換算): リターン +9.3% /
+      ボラ 4.7% /
+      Sharpe 1.95 — サンプル4営業日
+      (15日未満は参考値)
+    </p>
+  </div>
+
+  <div class="grid2">
+    <div><h2>保有 — 単元株トラック</h2><div class="card"><div class='tblwrap'><table><tr><th>銘柄</th><th>数量</th><th>取得</th><th>現在</th><th>損益</th><th>配分</th></tr><tr><td>8309.T</td><td class='num'>100株</td><td class='num'>1,750.4</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr><tr><td>2801.T</td><td class='num'>100株</td><td class='num'>1,837.4</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr><tr><td>9434.T</td><td class='num'>1,100株</td><td class='num'>240.5</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr></table></div></div></div>
+    <div><h2>保有 — 1株トラック</h2><div class="card"><div class='tblwrap'><table><tr><th>銘柄</th><th>数量</th><th>取得</th><th>現在</th><th>損益</th><th>配分</th></tr><tr><td>7203.T</td><td class='num'>22株</td><td class='num'>3,131.9</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr><tr><td>6758.T</td><td class='num'>18株</td><td class='num'>3,858.5</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr><tr><td>6501.T</td><td class='num'>11株</td><td class='num'>5,277.6</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr><tr><td>9101.T</td><td class='num'>12株</td><td class='num'>7,215.8</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr><tr><td>2914.T</td><td class='num'>15株</td><td class='num'>6,905.2</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr><tr><td>9434.T</td><td class='num'>375株</td><td class='num'>235.5</td><td class='num'>—</td><td class='num'>—</td><td class='num'>—</td></tr></table></div></div></div>
+  </div>
+
+  <div class="grid2">
+    <div><h2>直近の取引 — 単元株</h2><div class="card"><div class='tblwrap'><table><tr><th>日付</th><th></th><th>銘柄</th><th>数量</th><th>価格</th><th>理由</th></tr><tr><td>2026-08-26</td><td><span class='pill buy'>買</span></td><td>9434.T</td><td class='num'>1,100株</td><td class='num'>240.5</td><td class='reason'>買いシグナル +0.46 [SMA20/60乖離 +5.5%; 20日リターン +4.2%] |</td></tr><tr><td>2026-08-26</td><td><span class='pill buy'>買</span></td><td>2801.T</td><td class='num'>100株</td><td class='num'>1,837.4</td><td class='reason'>買いシグナル +0.60 [SMA20/60乖離 +6.3%; 20日リターン +9.8%] |</td></tr><tr><td>2026-08-26</td><td><span class='pill buy'>買</span></td><td>8309.T</td><td class='num'>100株</td><td class='num'>1,750.4</td><td class='reason'>買いシグナル +0.43 [SMA20/60乖離 +5.5%; 20日リターン +3.4%] |</td></tr></table></div></div></div>
+    <div><h2>直近の取引 — 1株</h2><div class="card"><div class='tblwrap'><table><tr><th>日付</th><th></th><th>銘柄</th><th>数量</th><th>価格</th><th>理由</th></tr><tr><td>2026-08-24</td><td><span class='pill buy'>買</span></td><td>9434.T</td><td class='num'>375株</td><td class='num'>235.5</td><td class='reason'>買いシグナル +0.53 [SMA20/60乖離 +5.4%; 20日リターン +6.0%] |</td></tr><tr><td>2026-08-24</td><td><span class='pill buy'>買</span></td><td>2914.T</td><td class='num'>15株</td><td class='num'>6,905.2</td><td class='reason'>買いシグナル +0.55 [SMA20/60乖離 +9.1%; 20日リターン +6.6%] |</td></tr><tr><td>2026-08-24</td><td><span class='pill buy'>買</span></td><td>9101.T</td><td class='num'>12株</td><td class='num'>7,215.8</td><td class='reason'>買いシグナル +0.60 [SMA20/60乖離 +10.3%; 20日リターン +21.1%]</td></tr><tr><td>2026-08-24</td><td><span class='pill buy'>買</span></td><td>6501.T</td><td class='num'>11株</td><td class='num'>5,277.6</td><td class='reason'>買いシグナル +0.60 [SMA20/60乖離 +7.6%; 20日リターン +8.6%] |</td></tr><tr><td>2026-08-24</td><td><span class='pill buy'>買</span></td><td>6758.T</td><td class='num'>18株</td><td class='num'>3,858.5</td><td class='reason'>買いシグナル +0.60 [SMA20/60乖離 +6.6%; 20日リターン +12.9%] </td></tr><tr><td>2026-08-24</td><td><span class='pill buy'>買</span></td><td>7203.T</td><td class='num'>22株</td><td class='num'>3,131.9</td><td class='reason'>買いシグナル +0.60 [SMA20/60乖離 +4.3%; 20日リターン +7.9%] |</td></tr></table></div></div></div>
+  </div>
+
+  <p class="note">
+    毎営業日16:20 JST の自動売買サイクル後に更新。ペーパートレード (仮想売買) の結果であり、
+    実際の発注は行っていません。目標ラダーと判定基準の詳細は リポジトリの GOALS.md を参照。
+    投資判断は自己責任であり、本ボードは利益を保証するものではありません。
+  </p>
+</div>

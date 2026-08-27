@@ -128,7 +128,17 @@ class TradingManager:
         if execute and self.persist_state:
             self.portfolio.save(self.cfg.state_file)
             self._append_equity_log(date, result.portfolio_summary.get("equity", 0))
+            self._save_summary(date, result.portfolio_summary)
         return result
+
+    def _save_summary(self, date: str, summary: dict) -> None:
+        """最新の評価サマリ (保有の現在値・損益込み) をダッシュボード用に保存"""
+        import json
+        import os
+
+        path = os.path.join(os.path.dirname(self.cfg.state_file) or ".", "summary.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"date": date, **summary}, f, ensure_ascii=False, indent=2)
 
     def _append_equity_log(self, date: str, equity: float) -> None:
         """日次資産推移を equity_log.csv に追記する (同日分は上書き)"""
