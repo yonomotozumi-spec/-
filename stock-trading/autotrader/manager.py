@@ -54,7 +54,12 @@ class TradingManager:
         self.portfolio = portfolio or Portfolio.load(cfg.state_file, cfg.initial_capital)
         self.strategy = EnsembleStrategy(cfg.strategy)
         self.risk = RiskManager(cfg.risk)
-        self.broker = PaperBroker(cfg.execution)
+        if cfg.execution.mode == "kabu":
+            from .execution.kabu import KabuBroker
+
+            self.broker: PaperBroker | "KabuBroker" = KabuBroker()
+        else:
+            self.broker = PaperBroker(cfg.execution)
 
     # ------------------------------------------------------------------
     def run_cycle(

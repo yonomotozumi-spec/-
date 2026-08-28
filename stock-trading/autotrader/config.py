@@ -87,9 +87,9 @@ def load_config(path: str | None = None) -> Config:
         screener=ScreenerConfig(**raw.get("screener", {})),
         state_file=raw.get("state_file", "state/portfolio.json"),
     )
-    if cfg.execution.mode != "paper":
+    if cfg.execution.mode not in ("paper", "kabu"):
         raise ValueError(
-            "execution.mode は現在 'paper' のみサポートしています。"
-            "実運用には証券会社APIアダプタの実装と明示的な有効化が必要です。"
+            "execution.mode は 'paper' (仮想売買) または 'kabu' "
+            "(kabuステーションAPI・要環境変数) のみサポートしています。"
         )
     return cfg
