@@ -48,6 +48,11 @@ td { padding:7px 10px; border-bottom:1px solid var(--grid); }
 .bar { display:inline-block; width:120px; height:8px; background:var(--chip); border-radius:99px; vertical-align:middle; margin-right:8px; }
 .fill { height:100%; background:var(--acc); border-radius:99px; }
 .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.wl-total { font-size:1.15rem; font-weight:700; font-variant-numeric:tabular-nums; margin-bottom:4px; }
+.wl-h { font-size:.78rem; color:var(--muted); letter-spacing:.03em; margin-top:14px; }
+.wl-line { margin:6px 0 0; font-size:.85rem; font-variant-numeric:tabular-nums; }
+.wlbar { display:flex; height:10px; border-radius:99px; overflow:hidden; gap:2px; margin-top:8px; background:var(--chip); }
+.wl-w { background:var(--pos); } .wl-l { background:var(--neg); }
 .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
 .fan-title { font-size:.85rem; font-weight:700; margin-bottom:6px; }
 @media (max-width:760px) { .grid2, .grid3 { grid-template-columns:1fr } }
@@ -66,6 +71,11 @@ td { padding:7px 10px; border-bottom:1px solid var(--grid); }
     <div class="tile neg"><div class="t-label">対TO-BEペース (2026末165万への進捗線)</div><div class="t-value">-0.5万円</div><div class="t-sub">本日のペース基準 1,502,381円</div></div>
     <div class="tile"><div class="t-label">1株トラック 総資産 (実力測定用)</div><div class="t-value">503,911円</div><div class="t-sub">累積 +0.78% / 5営業日</div></div>
     <div class="tile"><div class="t-label">レバレッジ許可判定</div><div class="t-value">—</div><div class="t-sub">計測 5/15営業日 — 判定はサンプル15日以降</div></div>
+  </div>
+
+  <div class="grid2" style="margin-top:8px">
+    <div><h2>勝敗 — 単元株トラック</h2><div class='card'><div class='wl-total neg'>トータル損益 -2,454円 (-0.16%)</div><div class='wl-h'>① 決済済みの勝敗 (実現損益)</div><p class='muted'>まだ決済した取引はありません (全ポジション保有中)</p><div class='wl-h'>② 保有中の勝敗 (含み損益)</div><div class='wlbar'><div class='wl-w' style='width:33.3%'></div><div class='wl-l' style='width:66.7%'></div></div><p class='wl-line'><span class='pos'>含み益 1銘柄 (+3,921円)</span> / <span class='neg'>含み損 2銘柄 (-5,741円)</span><br>最高 8309.T <span class='pos'>+2.2%</span> ・ 最低 2801.T <span class='neg'>-1.4%</span></p><div class='wl-h'>③ 日次の勝敗 (資産が増えた日/減った日)</div><div class='wlbar'><div class='wl-w' style='width:50.0%'></div><div class='wl-l' style='width:50.0%'></div></div><p class='wl-line'><span class='pos'>勝ち 1日 (平均 +4,870円)</span> / <span class='neg'>負け 1日 (平均 -5,150円)</span> / 変わらず 0日</p></div></div>
+    <div><h2>勝敗 — 1株トラック</h2><div class='card'><div class='wl-total pos'>トータル損益 +3,911円 (+0.78%)</div><div class='wl-h'>① 決済済みの勝敗 (実現損益)</div><p class='muted'>まだ決済した取引はありません (全ポジション保有中)</p><div class='wl-h'>② 保有中の勝敗 (含み損益)</div><div class='wlbar'><div class='wl-w' style='width:66.7%'></div><div class='wl-l' style='width:33.3%'></div></div><p class='wl-line'><span class='pos'>含み益 4銘柄 (+5,709円)</span> / <span class='neg'>含み損 2銘柄 (-1,564円)</span><br>最高 6501.T <span class='pos'>+5.2%</span> ・ 最低 9101.T <span class='neg'>-1.4%</span></p><div class='wl-h'>③ 日次の勝敗 (資産が増えた日/減った日)</div><div class='wlbar'><div class='wl-w' style='width:75.0%'></div><div class='wl-l' style='width:25.0%'></div></div><p class='wl-line'><span class='pos'>勝ち 3日 (平均 +2,215円)</span> / <span class='neg'>負け 1日 (平均 -1,453円)</span> / 変わらず 0日</p></div></div>
   </div>
 
   <h2>AS-IS → TO-BE (単元株トラック・金額目標)</h2>

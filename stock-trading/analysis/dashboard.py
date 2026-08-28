@@ -226,6 +226,103 @@ def line_chart(
     return "".join(out)
 
 
+def replay_realized(trades: list[dict]) -> list[dict]:
+    """取引履歴を再生し、決済(売り)ごとの実現損益を計算する"""
+    pos: dict[str, tuple[float, float]] = {}
+    closed = []
+    for t in trades:
+        q, a = pos.get(t["ticker"], (0.0, 0.0))
+        if t["side"] == "BUY":
+            nq = q + t["quantity"]
+            pos[t["ticker"]] = (nq, (a * q + t["price"] * t["quantity"]) / nq)
+        else:
+            pnl = (t["price"] - a) * t["quantity"] - t["commission"]
+            closed.append({"date": t["date"], "ticker": t["ticker"], "pnl": pnl,
+                           "pnl_pct": (t["price"] / a - 1) * 100 if a else 0.0,
+                           "reason": t["reason"]})
+            pos[t["ticker"]] = (q - t["quantity"], a)
+    return closed
+
+
+def wl_bar(win: int, lose: int) -> str:
+    total = win + lose
+    if total == 0:
+        return ""
+    wp = win / total * 100
+    return (f"<div class='wlbar'><div class='wl-w' style='width:{wp:.1f}%'></div>"
+            f"<div class='wl-l' style='width:{100 - wp:.1f}%'></div></div>")
+
+
+def winloss_card(name: str, track: dict, initial: float) -> str:
+    pf_data = track.get("portfolio") or {}
+    summary = track.get("summary") or {}
+    eq = track.get("equity")
+
+    total_pnl = (summary.get("equity", initial) or initial) - initial
+    tone = "pos" if total_pnl >= 0 else "neg"
+    parts = [f"<div class='wl-total {tone}'>トータル損益 {total_pnl:+,.0f}円 "
+             f"({total_pnl / initial * 100:+.2f}%)</div>"]
+
+    # 1. 実現損益 (決済済みの勝敗)
+    closed = replay_realized(pf_data.get("trades", []))
+    wins = [c for c in closed if c["pnl"] > 0]
+    losses = [c for c in closed if c["pnl"] <= 0]
+    parts.append("<div class='wl-h'>① 決済済みの勝敗 (実現損益)</div>")
+    if not closed:
+        parts.append("<p class='muted'>まだ決済した取引はありません (全ポジション保有中)</p>")
+    else:
+        realized = sum(c["pnl"] for c in closed)
+        avg_w = sum(c["pnl_pct"] for c in wins) / len(wins) if wins else 0
+        avg_l = sum(c["pnl_pct"] for c in losses) / len(losses) if losses else 0
+        gross_w = sum(c["pnl"] for c in wins)
+        gross_l = -sum(c["pnl"] for c in losses)
+        pf = gross_w / gross_l if gross_l > 0 else float("inf")
+        parts.append(wl_bar(len(wins), len(losses)))
+        parts.append(
+            f"<p class='wl-line'><span class='pos'>勝ち {len(wins)}回</span> / "
+            f"<span class='neg'>負け {len(losses)}回</span> (勝率 {len(wins) / len(closed) * 100:.0f}%) ・ "
+            f"実現損益 <b class='{'pos' if realized >= 0 else 'neg'}'>{realized:+,.0f}円</b><br>"
+            f"平均勝ち <span class='pos'>{avg_w:+.1f}%</span> / 平均負け <span class='neg'>{avg_l:+.1f}%</span>"
+            + (f" ・ 損益レシオ {pf:.2f}" if gross_l > 0 else "") + "</p>"
+        )
+
+    # 2. 含み損益 (保有中の勝敗)
+    parts.append("<div class='wl-h'>② 保有中の勝敗 (含み損益)</div>")
+    holdings = summary.get("holdings") or []
+    if not holdings:
+        parts.append("<p class='muted'>保有なし</p>")
+    else:
+        hw = [h for h in holdings if h["pnl_pct"] >= 0]
+        hl = [h for h in holdings if h["pnl_pct"] < 0]
+        def _amt(hs):
+            return sum(h["value"] - h["value"] / (1 + h["pnl_pct"] / 100) for h in hs)
+        parts.append(wl_bar(len(hw), len(hl)))
+        best = max(holdings, key=lambda h: h["pnl_pct"])
+        worst = min(holdings, key=lambda h: h["pnl_pct"])
+        parts.append(
+            f"<p class='wl-line'><span class='pos'>含み益 {len(hw)}銘柄 ({_amt(hw):+,.0f}円)</span> / "
+            f"<span class='neg'>含み損 {len(hl)}銘柄 ({_amt(hl):+,.0f}円)</span><br>"
+            f"最高 {best['ticker']} <span class='pos'>{best['pnl_pct']:+.1f}%</span> ・ "
+            f"最低 {worst['ticker']} <span class='neg'>{worst['pnl_pct']:+.1f}%</span></p>"
+        )
+
+    # 3. 日次の勝敗
+    parts.append("<div class='wl-h'>③ 日次の勝敗 (資産が増えた日/減った日)</div>")
+    if eq is None or len(eq) < 2:
+        parts.append("<p class='muted'>計測期間が短いため未算出</p>")
+    else:
+        diffs = eq["equity"].diff().dropna()
+        up, down = diffs[diffs > 0], diffs[diffs < 0]
+        parts.append(wl_bar(len(up), len(down)))
+        parts.append(
+            f"<p class='wl-line'><span class='pos'>勝ち {len(up)}日 (平均 {up.mean() if len(up) else 0:+,.0f}円)</span> / "
+            f"<span class='neg'>負け {len(down)}日 (平均 {down.mean() if len(down) else 0:+,.0f}円)</span> / "
+            f"変わらず {int((diffs == 0).sum())}日</p>"
+        )
+
+    return f"<div><h2>勝敗 — {name}</h2><div class='card'>{''.join(parts)}</div></div>"
+
+
 def tile(label: str, value: str, sub: str = "", tone: str = "") -> str:
     cls = f"tile {tone}".strip()
     return (f'<div class="{cls}"><div class="t-label">{label}</div>'
@@ -414,6 +511,11 @@ td {{ padding:7px 10px; border-bottom:1px solid var(--grid); }}
 .bar {{ display:inline-block; width:120px; height:8px; background:var(--chip); border-radius:99px; vertical-align:middle; margin-right:8px; }}
 .fill {{ height:100%; background:var(--acc); border-radius:99px; }}
 .grid2 {{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }}
+.wl-total {{ font-size:1.15rem; font-weight:700; font-variant-numeric:tabular-nums; margin-bottom:4px; }}
+.wl-h {{ font-size:.78rem; color:var(--muted); letter-spacing:.03em; margin-top:14px; }}
+.wl-line {{ margin:6px 0 0; font-size:.85rem; font-variant-numeric:tabular-nums; }}
+.wlbar {{ display:flex; height:10px; border-radius:99px; overflow:hidden; gap:2px; margin-top:8px; background:var(--chip); }}
+.wl-w {{ background:var(--pos); }} .wl-l {{ background:var(--neg); }}
 .grid3 {{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }}
 .fan-title {{ font-size:.85rem; font-weight:700; margin-bottom:6px; }}
 @media (max-width:760px) {{ .grid2, .grid3 {{ grid-template-columns:1fr }} }}
@@ -433,6 +535,11 @@ td {{ padding:7px 10px; border-bottom:1px solid var(--grid); }}
           f"本日のペース基準 {yen(pace_today)}円", gap_tone if gap < 0 else "good")}
     {tile("1株トラック 総資産 (実力測定用)", yen(t1_now) + "円", f"累積 {pct(t1_ret)} / {t1_days}営業日")}
     {tile("レバレッジ許可判定", "—" if t1_days < 15 or sharpe is None else f"Sharpe {sharpe:.2f}", gate, gate_tone)}
+  </div>
+
+  <div class="grid2" style="margin-top:8px">
+    {winloss_card("単元株トラック", live, LIVE_START[1])}
+    {winloss_card("1株トラック", t1, T1_START[1])}
   </div>
 
   <h2>AS-IS → TO-BE (単元株トラック・金額目標)</h2>
