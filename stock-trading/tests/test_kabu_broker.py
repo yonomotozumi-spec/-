@@ -14,7 +14,7 @@ def broker(monkeypatch):
     def fake_request(method, path, body=None, token=None):
         b_calls.append((method, path, body, token))
         if path == "/token":
-            return {"Token": "tok123"}
+            return {"ResultCode": 0, "Token": "tok123"}
         if path == "/sendorder":
             return {"Result": 0, "OrderId": "ORD1"}
         if path.startswith("/orders"):
@@ -77,4 +77,18 @@ def test_send_error_raises(broker):
 
     broker._request = failing
     with pytest.raises(ValueError, match="発注エラー"):
+        broker.execute("8309.T", "BUY", 100, ref_price=1750.0)
+
+
+def test_dead_order_raises(broker):
+    orig = broker._request
+
+    def dead(method, path, body=None, token=None):
+        if path.startswith("/orders"):
+            return [{"ID": "ORD1", "State": 5,
+                     "Details": [{"RecType": 6, "Price": 0, "Qty": 100}]}]  # 取消
+        return orig(method, path, body, token)
+
+    broker._request = dead
+    with pytest.raises(ValueError, match="約定せず"):
         broker.execute("8309.T", "BUY", 100, ref_price=1750.0)

@@ -63,7 +63,7 @@ class KabuBroker(Broker):
     def _get_token(self) -> str:
         if not self._token:
             r = self._request("POST", "/token", {"APIPassword": self.api_password})
-            if "Token" not in r:
+            if r.get("ResultCode") != 0 or "Token" not in r:
                 raise RuntimeError(f"トークン取得失敗: {r}")
             self._token = r["Token"]
         return self._token
@@ -85,7 +85,9 @@ class KabuBroker(Broker):
             "Side": "2" if side == "BUY" else "1",
             "CashMargin": CASH_MARGIN_SPOT,
             "DelivType": DELIV_TYPE_DEPOSIT if side == "BUY" else 0,
-            "FundType": FUND_TYPE_CASH if side == "BUY" else "  ",
+            # 現物買の資産区分: AA=信用代用(信用口座あり) / 02=保護(現物口座のみ)
+            "FundType": os.environ.get("KABU_FUND_TYPE", FUND_TYPE_CASH)
+            if side == "BUY" else "  ",
             "AccountType": ACCOUNT_TYPE_TOKUTEI,
             "Qty": quantity,
             "FrontOrderType": ORDER_TYPE_MARKET,
@@ -103,18 +105,26 @@ class KabuBroker(Broker):
 
     def _wait_fill(self, order_id: str, token: str, ref_price: float,
                    retries: int = 6, interval: float = 2.0) -> tuple[float, float]:
-        """約定照会をポーリングし約定単価を取る。取れなければ参照価格で近似"""
+        """約定照会をポーリングし約定単価を取る。
+
+        State=5(終了) は全約定のほか取消・失効・期限切れ・発注エラーも含むため、
+        約定明細 (RecType=8) の有無で判別する。タイムアウト時のみ参照価格で近似。
+        """
         for _ in range(retries):
             try:
                 orders = self._request("GET", f"/orders?id={order_id}", token=token)
                 for o in orders if isinstance(orders, list) else []:
-                    if o.get("ID") == order_id and o.get("State") == 5:  # 終了(約定)
-                        details = o.get("Details", [])
-                        fills = [d for d in details if d.get("RecType") == 8]  # 約定
-                        if fills:
-                            qty = sum(d["Qty"] for d in fills)
-                            avg = sum(d["Price"] * d["Qty"] for d in fills) / qty
-                            return round(avg, 2), 0.0  # 手数料は月次明細で照合
+                    if o.get("ID") != order_id or o.get("State") != 5:
+                        continue
+                    fills = [d for d in o.get("Details", []) if d.get("RecType") == 8]
+                    if fills:
+                        qty = sum(d["Qty"] for d in fills)
+                        avg = sum(d["Price"] * d["Qty"] for d in fills) / qty
+                        return round(avg, 2), 0.0  # 手数料は月次明細で照合
+                    raise ValueError(
+                        f"注文 {order_id} は約定せずに終了しました (取消/失効/エラー)")
+            except ValueError:
+                raise
             except Exception:
                 pass
             time.sleep(interval)
