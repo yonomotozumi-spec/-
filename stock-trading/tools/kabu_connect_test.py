@@ -43,7 +43,13 @@ def main() -> None:
     base = f"http://{args.host}:{port}/kabusapi"
     label = "検証" if args.verify else "本番"
     print(f"接続先: {base} ({label}ポート)")
-    pw = getpass.getpass(f"{label}用APIパスワードを入力 (表示されません): ")
+    import os
+
+    pw = os.environ.get("KABU_API_PASSWORD", "")
+    if pw:
+        print("APIパスワードは環境変数 KABU_API_PASSWORD から使用")
+    else:
+        pw = getpass.getpass(f"{label}用APIパスワードを入力 (表示されません): ")
 
     ok = 0
     # ① トークン取得
