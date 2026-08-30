@@ -16,8 +16,8 @@
 - [ ] **信用取引口座の申込** (審査あり)
       ※目的は2つ: ①kabuステーションProfessionalプラン(API利用に必要)の無料適用条件
         ②将来の動的レバレッジ運用 (実測Sharpe≥0.8で解禁判定)
-- [ ] **kabuステーションのインストール** (Windows PCが必要)
-- [ ] **API利用設定** (公式手順、2ステップ):
+- [x] **kabuステーションのインストール** (Windows PCが必要)
+- [x] **API利用設定** (2026-08-30 完了):
 
   **ステップ1: マイページでの「kabuステーションAPI利用設定」**
   1. メンバーズサイト (PC版) にログイン
@@ -36,12 +36,36 @@
   3. 「OK」→ kabuステーション再起動 → 右上アイコンが**緑**になれば利用可能
      (本番ポート18080 / 検証ポート18081)
 
+## Windows PCでの疎通確認手順 (API設定完了後・発注なし)
+
+1. **Pythonを導入** (未導入なら): https://www.python.org/downloads/ から3.11以降を
+   インストール (「Add python.exe to PATH」にチェック)
+2. PowerShellでリポジトリを取得:
+   ```powershell
+   git clone -b claude/stock-auto-trading-system-neb2u1 https://github.com/yonomotozumi-spec/-.git stock-system
+   cd stock-system\stock-trading
+   pip install -r requirements.txt
+   ```
+3. **kabuステーションを起動した状態で**疎通テスト (読み取りのみ・発注しない):
+   ```powershell
+   python tools\kabu_connect_test.py           # 本番ポート18080
+   python tools\kabu_connect_test.py --verify  # 検証ポート18081 (検証用パスワード)
+   ```
+   APIパスワードは実行時に非表示入力 (どこにも保存されない)。
+   4/4 OKが出れば技術的準備は完了。
+4. 実弾移行が承認されたら環境変数を永続設定 (PowerShell):
+   ```powershell
+   setx KABU_API_PASSWORD "本番用APIパスワード"
+   setx KABU_ORDER_PASSWORD "注文パスワード"
+   # KABU_CONFIRM_LIVE は移行判断が出るまで設定しない (安全装置)
+   ```
+
 ### 私 (Claude) の作業
 
 - [x] 単元株モードのペーパー計測 (planLive, 8/26開始・並行実行中)
 - [x] **KabuBrokerアダプタ実装** (`autotrader/execution/kabu.py`, 8/28)
       SOR発注対応・成行/約定照会・単元株。モック済みユニットテスト付き
-- [ ] 実機接続テスト手順の案内 (APIパスワード発行後)
+- [x] 疎通確認スクリプト `tools/kabu_connect_test.py` を用意 (8/30)
 - [ ] 検証: 照会系APIのみで疎通確認 → 1単元のテスト発注 → 本稼働
 
 ## 実弾運用のアーキテクチャ (重要な制約)
