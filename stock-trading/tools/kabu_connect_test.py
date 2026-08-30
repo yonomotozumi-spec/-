@@ -51,6 +51,10 @@ def main() -> None:
     else:
         pw = getpass.getpass(f"{label}用APIパスワードを入力 (表示されません): ")
 
+    # 全角文字の混入チェック (IME入力ミスの検出)
+    if any(ord(c) > 127 for c in pw):
+        print("[警告] パスワードに全角文字が含まれています。IMEを半角英数にして再入力してください")
+
     ok = 0
     # ① トークン取得
     try:
@@ -63,6 +67,19 @@ def main() -> None:
             print(f"[NG] 1/4 トークン取得: {r}")
             print("     → APIパスワードの誤り、または検証用/本番用の取り違えの可能性")
             sys.exit(1)
+    except urllib.error.HTTPError as e:
+        try:
+            detail = json.loads(e.read().decode())
+        except Exception:
+            detail = "(詳細なし)"
+        print(f"[NG] 1/4 認証エラー: HTTP {e.code} / サーバー応答: {detail}")
+        print("     接続自体は成功しています。以下を確認してください:")
+        print("     ・入力したのは APIシステム設定の「APIパスワード(本番用)」欄の値か")
+        print("       (検証用と取り違えていないか / ログインパスワードや注文パスワードではない)")
+        print("     ・パスワード設定後に「OK」→ kabuステーションを再起動したか")
+        print("       (設定は次回起動時に適用されます)")
+        print("     ・IMEが半角英数になっているか (全角文字の混入)")
+        sys.exit(1)
     except urllib.error.URLError as e:
         print(f"[NG] 1/4 接続失敗: {e}")
         print("     → kabuステーションが起動しているか / APIシステム設定で「APIを利用する」が")
