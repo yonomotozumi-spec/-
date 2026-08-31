@@ -29,7 +29,9 @@ strategy:
 
 execution:
   mode: paper
-  commission_pct: 0.001       # kabuステーション現物手数料相当の保守値
+  commission_pct: 0.0        # SOR注文で国内株式手数料は無料 (2026-05-18〜)
+                              # ※SOR以外の市場指定では手数料が発生するため、
+                              #   KabuBrokerは Exchange=9(SOR) 固定で発注する
   slippage_pct: 0.0005        # 取引所執行のためスプレッド影響は小さい
   lot_size: 100               # 単元株のみ (kabuステーションAPIの制約)
 
