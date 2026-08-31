@@ -110,3 +110,25 @@ def test_order_type_can_be_overridden(monkeypatch):
     monkeypatch.setenv("KABU_CONFIRM_LIVE", "yes")
     b = KabuBroker(order_type=ORDER_TYPE_MARKET)
     assert b.order_type == 10
+
+
+def test_verify_port_skips_live_guard(monkeypatch):
+    """検証ポートは実際に発注されないため KABU_CONFIRM_LIVE を要求しない"""
+    from autotrader.execution.kabu import PORT_VERIFY, KabuBroker
+
+    monkeypatch.setenv("KABU_API_PASSWORD_VERIFY", "verify-pass")
+    monkeypatch.setenv("KABU_ORDER_PASSWORD", "order-pass")
+    monkeypatch.delenv("KABU_CONFIRM_LIVE", raising=False)
+    b = KabuBroker(port=PORT_VERIFY)
+    assert b.verify_mode is True
+    assert b.base.endswith(":18081/kabusapi")
+
+
+def test_verify_port_requires_its_own_password(monkeypatch):
+    from autotrader.execution.kabu import PORT_VERIFY, KabuBroker
+
+    monkeypatch.setenv("KABU_API_PASSWORD", "live-pass")  # 本番用だけでは不可
+    monkeypatch.delenv("KABU_API_PASSWORD_VERIFY", raising=False)
+    monkeypatch.setenv("KABU_ORDER_PASSWORD", "order-pass")
+    with pytest.raises(RuntimeError, match="KABU_API_PASSWORD_VERIFY"):
+        KabuBroker(port=PORT_VERIFY)

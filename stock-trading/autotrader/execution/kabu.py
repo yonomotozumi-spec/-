@@ -11,12 +11,15 @@
   /orders から取得して補正する必要がある (照合処理は未実装)。
 
 必要な環境変数:
-  KABU_API_PASSWORD    APIパスワード (kabuステーションのAPI設定で発行)
-  KABU_ORDER_PASSWORD  注文パスワード
-  KABU_CONFIRM_LIVE    "yes" でないと発注を拒否する安全装置
+  KABU_API_PASSWORD         本番用APIパスワード (port=18080)
+  KABU_API_PASSWORD_VERIFY  検証用APIパスワード (port=18081)
+  KABU_ORDER_PASSWORD       注文パスワード
+  KABU_CONFIRM_LIVE         "yes" でないと本番発注を拒否する安全装置
+                            (検証ポートは実発注されないため不要)
 
-※ 実機での動作検証は未実施。初回は検証ポート(18081)での疎通確認と
-   1単元のテスト発注から始めること。
+※ 実機での発注検証は未実施。tools/kabu_dryrun_order.py (検証ポート) で
+   コード経路を確認し、入金後に tools/kabu_test_order.py で1単元の
+   本番テスト発注を行うこと。
 """
 
 from __future__ import annotations
@@ -37,18 +40,24 @@ ACCOUNT_TYPE_TOKUTEI = 4  # 特定口座
 ORDER_TYPE_MARKET = 10          # 成行 (即時執行・ザラ場用)
 ORDER_TYPE_OPENING_MARKET = 13  # 寄成（前場）翌営業日の寄付で約定
 
+PORT_LIVE = 18080    # 本番用: 実際に発注される
+PORT_VERIFY = 18081  # 検証用: 常に一定の値を返し、実際には発注されない
+
 
 class KabuBroker(Broker):
-    def __init__(self, host: str = "localhost", port: int = 18080,
+    def __init__(self, host: str = "localhost", port: int = PORT_LIVE,
                  max_orders_per_day: int = 0,
                  order_type: int = ORDER_TYPE_OPENING_MARKET):
         self.base = f"http://{host}:{port}/kabusapi"
-        self.api_password = os.environ.get("KABU_API_PASSWORD", "")
+        # 検証ポートは実際には発注されないため、環境変数の安全装置を要求しない
+        self.verify_mode = port == PORT_VERIFY
+        pw_env = "KABU_API_PASSWORD_VERIFY" if self.verify_mode else "KABU_API_PASSWORD"
+        self.api_password = os.environ.get(pw_env, "")
         self.order_password = os.environ.get("KABU_ORDER_PASSWORD", "")
         if not self.api_password or not self.order_password:
             raise RuntimeError(
-                "環境変数 KABU_API_PASSWORD / KABU_ORDER_PASSWORD を設定してください")
-        if os.environ.get("KABU_CONFIRM_LIVE") != "yes":
+                f"環境変数 {pw_env} / KABU_ORDER_PASSWORD を設定してください")
+        if not self.verify_mode and os.environ.get("KABU_CONFIRM_LIVE") != "yes":
             raise RuntimeError(
                 "実発注には環境変数 KABU_CONFIRM_LIVE=yes が必要です (安全装置)")
         self.max_orders_per_day = max_orders_per_day  # 0=無制限
