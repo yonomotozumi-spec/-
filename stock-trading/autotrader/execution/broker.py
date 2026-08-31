@@ -19,6 +19,8 @@ class Fill:
     quantity: int
     price: float       # 約定単価 (スリッページ込み)
     commission: float
+    order_id: str = ""   # 実弾モードの注文番号 (照合に使う)
+    pending: bool = False  # True=まだ約定しておらず price は参照価格の暫定値
 
 
 class Broker(ABC):

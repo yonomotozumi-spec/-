@@ -23,6 +23,11 @@ class Trade:
     price: float
     commission: float
     reason: str
+    # 実弾モードで寄成注文を出した直後は約定価格が未確定になる。
+    # 翌サイクル冒頭の照合処理で実績に補正するまで settled=False のまま。
+    order_id: str = ""
+    settled: bool = True
+    prev_avg_cost: float = 0.0  # 取消時に建玉を復元するための約定前の平均取得単価
 
 
 @dataclass
@@ -54,10 +59,12 @@ class Portfolio:
 
     # ---- 約定の反映 -------------------------------------------------------
     def apply_buy(self, date: str, ticker: str, qty: int, price: float,
-                  commission: float, reason: str) -> None:
+                  commission: float, reason: str,
+                  order_id: str = "", settled: bool = True) -> None:
         cost = qty * price + commission
         if cost > self.cash + 1e-6:
             raise ValueError(f"{ticker}: 現金不足 (必要 {cost:,.0f} / 保有 {self.cash:,.0f})")
+        prev_avg = self.positions[ticker].avg_cost if ticker in self.positions else 0.0
         self.cash -= cost
         pos = self.positions.get(ticker)
         if pos:
@@ -66,18 +73,82 @@ class Portfolio:
             pos.quantity = total_qty
         else:
             self.positions[ticker] = Position(ticker, qty, price)
-        self.trades.append(Trade(date, ticker, "BUY", qty, price, commission, reason))
+        self.trades.append(Trade(date, ticker, "BUY", qty, price, commission, reason,
+                                 order_id, settled, prev_avg))
 
     def apply_sell(self, date: str, ticker: str, qty: int, price: float,
-                   commission: float, reason: str) -> None:
+                   commission: float, reason: str,
+                   order_id: str = "", settled: bool = True) -> None:
         pos = self.positions.get(ticker)
         if not pos or pos.quantity < qty:
             raise ValueError(f"{ticker}: 保有数量不足")
+        prev_avg = pos.avg_cost
         self.cash += qty * price - commission
         pos.quantity -= qty
         if pos.quantity == 0:
             del self.positions[ticker]
-        self.trades.append(Trade(date, ticker, "SELL", qty, price, commission, reason))
+        self.trades.append(Trade(date, ticker, "SELL", qty, price, commission, reason,
+                                 order_id, settled, prev_avg))
+
+    # ---- 未確定注文の照合 ---------------------------------------------------
+    def pending_trades(self) -> list[tuple[int, "Trade"]]:
+        """約定価格が未確定の取引を (インデックス, Trade) で返す"""
+        return [(i, t) for i, t in enumerate(self.trades)
+                if not t.settled and t.order_id]
+
+    def settle_trade(self, index: int, actual_price: float,
+                     actual_commission: float) -> float:
+        """未確定取引を実際の約定単価で補正し、資産への影響額を返す。
+
+        照合はサイクル冒頭 (新規売買の前) に行うため、対象銘柄に対して
+        この取引以降の売買は無いことが保証される。
+        """
+        t = self.trades[index]
+        if t.settled:
+            return 0.0
+        dp = actual_price - t.price
+        dc = actual_commission - t.commission
+        if t.side == "BUY":
+            self.cash -= dp * t.quantity + dc
+            pos = self.positions.get(t.ticker)
+            if pos and pos.quantity > 0:
+                pos.avg_cost = (pos.avg_cost * pos.quantity + dp * t.quantity) / pos.quantity
+            impact = -(dp * t.quantity + dc)
+        else:
+            self.cash += dp * t.quantity - dc
+            impact = dp * t.quantity - dc
+        t.price, t.commission, t.settled = actual_price, actual_commission, True
+        return impact
+
+    def cancel_trade(self, index: int, note: str) -> None:
+        """約定しなかった取引を取り消し、現金と建玉を元に戻す"""
+        t = self.trades[index]
+        if t.settled:
+            return
+        if t.side == "BUY":
+            self.cash += t.quantity * t.price + t.commission
+            pos = self.positions.get(t.ticker)
+            if pos:
+                remain = pos.quantity - t.quantity
+                if remain <= 0:
+                    del self.positions[t.ticker]
+                else:
+                    pos.quantity = remain
+                    pos.avg_cost = t.prev_avg_cost or pos.avg_cost
+        else:
+            self.cash -= t.quantity * t.price - t.commission
+            pos = self.positions.get(t.ticker)
+            if pos:
+                pos.quantity += t.quantity
+            else:
+                self.positions[t.ticker] = Position(
+                    t.ticker, t.quantity, t.prev_avg_cost or t.price)
+            self.positions[t.ticker].avg_cost = t.prev_avg_cost or t.price
+        t.settled = True
+        # 数量を0にして損益・勝敗の集計対象から外す。何株の注文だったかは
+        # 監査のため理由欄に残す。
+        t.reason += f" / {note} (不成立: {t.quantity}株)"
+        t.quantity = 0
 
     # ---- 永続化 -----------------------------------------------------------
     def save(self, path: str) -> None:

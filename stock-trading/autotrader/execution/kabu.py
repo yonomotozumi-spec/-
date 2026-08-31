@@ -5,10 +5,10 @@
   ・2026年2月以降、市場コード「1(東証)」直接指定の新規発注が不可
   ・2026年5月18日以降、SOR注文が国内株式手数料無料化の条件
 
-既知の制約 (実弾移行前に対応が必要):
-  既定の寄成(前場)は翌営業日の寄付まで約定しないため、_wait_fill は
-  タイムアウトして参照価格を返す。正しい約定単価は翌日サイクルの冒頭で
-  /orders から取得して補正する必要がある (照合処理は未実装)。
+約定単価の確定について:
+  既定の寄成(前場)は翌営業日の寄付まで約定しない。その場合 execute() は
+  参照価格を暫定値とした pending の Fill を返し、TradingManager が翌サイクル
+  冒頭で fetch_fill() を使って実際の約定単価に補正する (照合処理)。
 
 必要な環境変数:
   KABU_API_PASSWORD         本番用APIパスワード (port=18080)
@@ -122,32 +122,55 @@ class KabuBroker(Broker):
         self._orders_today += 1
         order_id = r.get("OrderId", "")
 
-        price, commission = self._wait_fill(order_id, token, ref_price)
-        return Fill(ticker, side, quantity, price, commission)
+        status, price, commission = self._wait_fill(order_id, token)
+        if status == "filled":
+            return Fill(ticker, side, quantity, price, commission, order_id)
+        if status == "dead":
+            raise ValueError(f"{ticker}: 注文 {order_id} は約定せずに終了しました")
+        # 寄成など、この場では約定しない注文。参照価格を暫定値として記録し、
+        # 翌サイクルの照合処理で実際の約定単価に補正する。
+        return Fill(ticker, side, quantity, round(ref_price, 2), 0.0,
+                    order_id, pending=True)
 
-    def _wait_fill(self, order_id: str, token: str, ref_price: float,
-                   retries: int = 6, interval: float = 2.0) -> tuple[float, float]:
-        """約定照会をポーリングし約定単価を取る。
+    def fetch_fill(self, order_id: str) -> tuple[str, float, float]:
+        """照合用: 注文の現在状態を1回だけ問い合わせる。
 
-        State=5(終了) は全約定のほか取消・失効・期限切れ・発注エラーも含むため、
-        約定明細 (RecType=8) の有無で判別する。タイムアウト時のみ参照価格で近似。
+        戻り値 (状態, 約定単価, 手数料)。状態は filled / working / dead。
         """
-        for _ in range(retries):
+        return self._query_order(order_id, self._get_token())
+
+    def _query_order(self, order_id: str, token: str) -> tuple[str, float, float]:
+        """注文照会。State=5(終了) は取消・失効・エラーも含むため、
+        約定明細 (RecType=8) の有無で filled と dead を判別する。"""
+        orders = self._request("GET", f"/orders?id={order_id}", token=token)
+        for o in orders if isinstance(orders, list) else []:
+            if o.get("ID") != order_id:
+                continue
+            fills = [d for d in o.get("Details", []) if d.get("RecType") == 8]
+            if fills:
+                qty = sum(d["Qty"] for d in fills)
+                avg = sum(d["Price"] * d["Qty"] for d in fills) / qty
+                return "filled", round(avg, 2), 0.0  # 手数料は無料 (SOR)
+            if o.get("State") == 5:
+                return "dead", 0.0, 0.0
+            return "working", 0.0, 0.0
+        return "working", 0.0, 0.0
+
+    def _wait_fill(self, order_id: str, token: str,
+                   retries: int = 6, interval: float = 2.0) -> tuple[str, float, float]:
+        """短時間ポーリングして約定を待つ。成行ならここで確定する。
+
+        寄成のように当日約定しない注文は working のまま返り、呼び出し側が
+        pending として記録する。
+        """
+        status, price, commission = "working", 0.0, 0.0
+        for i in range(retries):
             try:
-                orders = self._request("GET", f"/orders?id={order_id}", token=token)
-                for o in orders if isinstance(orders, list) else []:
-                    if o.get("ID") != order_id or o.get("State") != 5:
-                        continue
-                    fills = [d for d in o.get("Details", []) if d.get("RecType") == 8]
-                    if fills:
-                        qty = sum(d["Qty"] for d in fills)
-                        avg = sum(d["Price"] * d["Qty"] for d in fills) / qty
-                        return round(avg, 2), 0.0  # 手数料は月次明細で照合
-                    raise ValueError(
-                        f"注文 {order_id} は約定せずに終了しました (取消/失効/エラー)")
-            except ValueError:
-                raise
+                status, price, commission = self._query_order(order_id, token)
+                if status in ("filled", "dead"):
+                    return status, price, commission
             except Exception:
                 pass
-            time.sleep(interval)
-        return round(ref_price, 2), 0.0
+            if i < retries - 1:
+                time.sleep(interval)
+        return status, price, commission

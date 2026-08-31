@@ -19,6 +19,10 @@ from autotrader.manager import CycleResult, TradingManager
 
 
 def print_cycle(result: CycleResult, executed: bool) -> None:
+    if result.reconciled:
+        print("\n=== 前回注文の約定確定 ===")
+        for note in result.reconciled:
+            print(f"  {note}")
     mode = "執行済み (ペーパー)" if executed else "指示のみ"
     print(f"\n=== 売買指示 {result.date} [{mode}] ===")
     if not result.instructions:

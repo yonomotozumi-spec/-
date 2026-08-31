@@ -43,6 +43,7 @@ class CycleResult:
     instructions: list[Instruction] = field(default_factory=list)
     portfolio_summary: dict = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
+    reconciled: list[str] = field(default_factory=list)  # 前日注文の約定確定結果
 
 
 class TradingManager:
@@ -77,6 +78,10 @@ class TradingManager:
         """
         date = as_of or dt.date.today().isoformat()
         result = CycleResult(date=date)
+
+        # --- 0. 前サイクルの未約定注文を実績に補正 (新規売買より前に行う) ---
+        if execute:
+            result.reconciled = self.reconcile_pending()
 
         prices = {t: float(df["close"].iloc[-1]) for t, df in market_data.items()}
 
@@ -166,17 +171,53 @@ class TradingManager:
     def _execute(self, inst: Instruction, date: str) -> None:
         try:
             fill = self.broker.execute(inst.ticker, inst.action, inst.quantity, inst.price)
+            settled = not fill.pending
+            if fill.pending:
+                inst.reason += " / 約定待ち(翌営業日の寄付で約定・翌サイクルで照合)"
             if inst.action == "BUY":
                 self.portfolio.apply_buy(
-                    date, fill.ticker, fill.quantity, fill.price, fill.commission, inst.reason
+                    date, fill.ticker, fill.quantity, fill.price, fill.commission,
+                    inst.reason, fill.order_id, settled
                 )
             else:
                 self.portfolio.apply_sell(
-                    date, fill.ticker, fill.quantity, fill.price, fill.commission, inst.reason
+                    date, fill.ticker, fill.quantity, fill.price, fill.commission,
+                    inst.reason, fill.order_id, settled
                 )
             inst.executed = True
         except ValueError as e:
             inst.reason += f" / 執行失敗: {e}"
+
+    # ------------------------------------------------------------------
+    def reconcile_pending(self) -> list[str]:
+        """前サイクルで出した未約定注文を実際の約定単価に補正する。
+
+        寄成注文は発注時点では約定していないため、参照価格を暫定値として
+        記録している。サイクル冒頭 (新規売買の前) にここで実績へ揃える。
+        ペーパートレードのブローカーは照合APIを持たないため何もしない。
+        """
+        fetch = getattr(self.broker, "fetch_fill", None)
+        if fetch is None:
+            return []
+        notes = []
+        for index, trade in self.portfolio.pending_trades():
+            try:
+                status, price, commission = fetch(trade.order_id)
+            except Exception as e:
+                notes.append(f"{trade.ticker}: 約定照会に失敗 ({e}) — 次サイクルで再試行")
+                continue
+            if status == "filled":
+                impact = self.portfolio.settle_trade(index, price, commission)
+                notes.append(
+                    f"{trade.ticker} {trade.side} 約定確定 {price:,.1f}円 "
+                    f"(暫定値との差 {impact:+,.0f}円)"
+                )
+            elif status == "dead":
+                self.portfolio.cancel_trade(index, "未約定のため取消")
+                notes.append(f"{trade.ticker} {trade.side} は約定せず取消 → 記録を巻き戻し")
+            else:
+                notes.append(f"{trade.ticker} {trade.side} は未約定のまま (注文継続中)")
+        return notes
 
     # ------------------------------------------------------------------
     def report(self, market_data: dict[str, pd.DataFrame]) -> dict:
