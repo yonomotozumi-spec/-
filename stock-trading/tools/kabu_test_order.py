@@ -29,9 +29,11 @@ def main() -> None:
         print('PowerShell (このセッション限り): $env:KABU_CONFIRM_LIVE="yes"')
         sys.exit(1)
 
-    from autotrader.execution.kabu import KabuBroker
+    from autotrader.execution.kabu import ORDER_TYPE_MARKET, KabuBroker
 
-    broker = KabuBroker()
+    # テストはザラ場中に即時約定させたいので成行を使う
+    # (日次サイクルの既定は寄成＝翌営業日の寄付約定)
+    broker = KabuBroker(order_type=ORDER_TYPE_MARKET)
     print("=" * 60)
     print(f" 実弾テスト発注: {SYMBOL} {QTY}株 成行買い (約2.4万円)")
     print(" ※これは仮想売買ではありません。実際に注文が執行されます")

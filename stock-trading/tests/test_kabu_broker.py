@@ -51,7 +51,7 @@ def test_buy_order_flow(broker):
     assert body["Symbol"] == "8309"      # .T が除去される
     assert body["Exchange"] == 9         # SOR
     assert body["Side"] == "2"           # 買い
-    assert body["FrontOrderType"] == 10  # 成行
+    assert body["FrontOrderType"] == 13  # 既定は寄成（前場）
     assert send[3] == "tok123"           # トークン付与
 
 
@@ -92,3 +92,21 @@ def test_dead_order_raises(broker):
     broker._request = dead
     with pytest.raises(ValueError, match="約定せず"):
         broker.execute("8309.T", "BUY", 100, ref_price=1750.0)
+
+
+def test_default_order_type_is_opening_market(broker):
+    # 日次サイクルは引け後に走るため、既定は寄成(前場)=13
+    broker.execute("8309.T", "BUY", 100, ref_price=1750.0)
+    body = [c for c in broker.calls if c[1] == "/sendorder"][0][2]
+    assert body["FrontOrderType"] == 13
+    assert body["Exchange"] == 9  # SOR指定は手数料無料の条件
+
+
+def test_order_type_can_be_overridden(monkeypatch):
+    from autotrader.execution.kabu import ORDER_TYPE_MARKET, KabuBroker
+
+    monkeypatch.setenv("KABU_API_PASSWORD", "a")
+    monkeypatch.setenv("KABU_ORDER_PASSWORD", "b")
+    monkeypatch.setenv("KABU_CONFIRM_LIVE", "yes")
+    b = KabuBroker(order_type=ORDER_TYPE_MARKET)
+    assert b.order_type == 10

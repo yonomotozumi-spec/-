@@ -1,8 +1,14 @@
 """三菱UFJ eスマート証券 kabuステーションAPI アダプタ
 
 ユーザーのWindows PC上で起動中のkabuステーションへ localhost REST で接続する。
-発注は現物・単元株・SOR(最良執行)・成行のみサポート (2026年2月以降、
-市場コード「1(東証)」直接指定の新規発注は不可のためSORを使用)。
+発注は現物・単元株・SOR(最良執行)のみサポート。SOR指定は2つの理由で必須:
+  ・2026年2月以降、市場コード「1(東証)」直接指定の新規発注が不可
+  ・2026年5月18日以降、SOR注文が国内株式手数料無料化の条件
+
+既知の制約 (実弾移行前に対応が必要):
+  既定の寄成(前場)は翌営業日の寄付まで約定しないため、_wait_fill は
+  タイムアウトして参照価格を返す。正しい約定単価は翌日サイクルの冒頭で
+  /orders から取得して補正する必要がある (照合処理は未実装)。
 
 必要な環境変数:
   KABU_API_PASSWORD    APIパスワード (kabuステーションのAPI設定で発行)
@@ -28,12 +34,14 @@ CASH_MARGIN_SPOT = 1      # 現物
 DELIV_TYPE_DEPOSIT = 2    # お預り金
 FUND_TYPE_CASH = "AA"     # 信用代用 (現金)
 ACCOUNT_TYPE_TOKUTEI = 4  # 特定口座
-ORDER_TYPE_MARKET = 10    # 成行
+ORDER_TYPE_MARKET = 10          # 成行 (即時執行・ザラ場用)
+ORDER_TYPE_OPENING_MARKET = 13  # 寄成（前場）翌営業日の寄付で約定
 
 
 class KabuBroker(Broker):
     def __init__(self, host: str = "localhost", port: int = 18080,
-                 max_orders_per_day: int = 0):
+                 max_orders_per_day: int = 0,
+                 order_type: int = ORDER_TYPE_OPENING_MARKET):
         self.base = f"http://{host}:{port}/kabusapi"
         self.api_password = os.environ.get("KABU_API_PASSWORD", "")
         self.order_password = os.environ.get("KABU_ORDER_PASSWORD", "")
@@ -44,6 +52,11 @@ class KabuBroker(Broker):
             raise RuntimeError(
                 "実発注には環境変数 KABU_CONFIRM_LIVE=yes が必要です (安全装置)")
         self.max_orders_per_day = max_orders_per_day  # 0=無制限
+        # 既定は寄成(前場): 日次サイクルは引け後に走るため、翌営業日の寄付で
+        # 東証の板が最も厚いタイミングに約定させる。成行のままだと夜間PTSに
+        # 流れて薄い板で不利約定するリスクがある。ザラ場での即時執行が必要な
+        # 場合のみ ORDER_TYPE_MARKET を渡す。
+        self.order_type = order_type
         self._orders_today = 0
         self._token: str | None = None
 
@@ -90,7 +103,7 @@ class KabuBroker(Broker):
             if side == "BUY" else "  ",
             "AccountType": ACCOUNT_TYPE_TOKUTEI,
             "Qty": quantity,
-            "FrontOrderType": ORDER_TYPE_MARKET,
+            "FrontOrderType": self.order_type,
             "Price": 0,
             "ExpireDay": 0,
         }
