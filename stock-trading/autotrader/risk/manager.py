@@ -27,15 +27,28 @@ class RiskManager:
         self.cfg = cfg
 
     # ---- 保有ポジションの強制決済判定 -------------------------------------
-    def check_exit(self, ticker: str, avg_cost: float, price: float) -> str | None:
-        """損切り・利確ラインに達していれば理由文字列を返す"""
+    def check_exit(self, ticker: str, avg_cost: float, price: float,
+                   peak_price: float = 0.0) -> str | None:
+        """損切り・利確ラインに達していれば理由文字列を返す。
+
+        判定順は 損切り → 固定利確 → トレーリング利確。
+        トレーリングは「高値から一定率下げたら利食う」方式で、上値を
+        追い続けられるためトレンドの右裾を切り落とさない。
+        """
         if avg_cost <= 0:
             return None
         change = (price - avg_cost) / avg_cost
         if change <= -self.cfg.stop_loss_pct:
             return f"損切り: 取得比 {change:.1%} <= -{self.cfg.stop_loss_pct:.0%}"
-        if change >= self.cfg.take_profit_pct:
+        if self.cfg.take_profit_pct > 0 and change >= self.cfg.take_profit_pct:
             return f"利確: 取得比 +{change:.1%} >= +{self.cfg.take_profit_pct:.0%}"
+        if self.cfg.trailing_stop_pct > 0 and peak_price > avg_cost:
+            trail_line = peak_price * (1 - self.cfg.trailing_stop_pct)
+            # 利益を確定できる場合のみ作動 (下回る場合は損切りに委ねる)
+            if trail_line > avg_cost and price <= trail_line:
+                drop = (price - peak_price) / peak_price
+                return (f"トレーリング利確: 高値{peak_price:,.0f}から{drop:.1%} "
+                        f"(取得比 +{change:.1%})")
         return None
 
     # ---- 新規買い注文のサイズ決定とチェック -------------------------------

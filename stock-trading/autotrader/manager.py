@@ -91,7 +91,10 @@ class TradingManager:
                 result.warnings.append(f"{ticker}: 価格取得不可のため判定スキップ")
                 continue
             pos = self.portfolio.positions[ticker]
-            exit_reason = self.risk.check_exit(ticker, pos.avg_cost, prices[ticker])
+            # トレーリングストップの基準となる保有中の最高値を更新
+            pos.peak_price = max(pos.peak_price or pos.avg_cost, prices[ticker])
+            exit_reason = self.risk.check_exit(
+                ticker, pos.avg_cost, prices[ticker], pos.peak_price)
             if exit_reason:
                 inst = Instruction(
                     ticker, "SELL", pos.quantity, prices[ticker], 0.0, exit_reason

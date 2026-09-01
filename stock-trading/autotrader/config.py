@@ -17,7 +17,10 @@ class RiskConfig:
     max_position_weight: float = 0.20
     max_gross_exposure: float = 0.90
     stop_loss_pct: float = 0.08
-    take_profit_pct: float = 0.20
+    take_profit_pct: float = 0.20   # 0 で無効化 (利益の上限を設けない)
+    # 高値からの下落率で利確する。0で無効。含み益が出ている場合のみ作動し、
+    # 損切りラインより上でしか発動しないため stop_loss_pct と競合しない。
+    trailing_stop_pct: float = 0.0
     max_daily_var_pct: float = 0.03
     risk_free_rate: float = 0.001
 

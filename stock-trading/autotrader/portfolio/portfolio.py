@@ -12,6 +12,7 @@ class Position:
     ticker: str
     quantity: int
     avg_cost: float
+    peak_price: float = 0.0  # 保有開始後の最高値 (トレーリングストップの基準)
 
 
 @dataclass
@@ -72,7 +73,7 @@ class Portfolio:
             pos.avg_cost = (pos.avg_cost * pos.quantity + price * qty) / total_qty
             pos.quantity = total_qty
         else:
-            self.positions[ticker] = Position(ticker, qty, price)
+            self.positions[ticker] = Position(ticker, qty, price, price)
         self.trades.append(Trade(date, ticker, "BUY", qty, price, commission, reason,
                                  order_id, settled, prev_avg))
 
