@@ -25,7 +25,8 @@ risk:
   max_position_weight: 0.35   # 集中投資を許容
   max_gross_exposure: 1.00    # フルインベストメント
   stop_loss_pct: 0.12
-  take_profit_pct: 0.35
+  take_profit_pct: 0.0        # 固定利確は無効 (上値を切らない)
+  trailing_stop_pct: 0.15     # トレンド追随を優先するため幅を広げる
   max_daily_var_pct: 0.05
   risk_free_rate: 0.001
 

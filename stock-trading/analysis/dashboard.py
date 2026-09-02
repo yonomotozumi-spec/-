@@ -366,6 +366,45 @@ def trades_table(portfolio: dict | None, n: int = 8) -> str:
             f"<th>価格</th><th>理由</th></tr>{''.join(rows)}</table></div>")
 
 
+def exit_rule_card() -> str:
+    """実際に稼働している設定ファイルから出口ルールを読んで表示する。
+
+    ボードの記載と稼働設定がずれないよう、値はハードコードせず
+    config/*.yaml から都度読み込む。
+    """
+    import sys
+
+    sys.path.insert(0, ROOT)
+    from autotrader.config import load_config
+
+    rows = []
+    for label, name in (("単元株 (実弾想定)", "planLive.yaml"), ("1株", "config.yaml")):
+        try:
+            r = load_config(os.path.join(ROOT, "config", name)).risk
+        except Exception:
+            continue
+        tp = f"+{r.take_profit_pct:.0%}" if r.take_profit_pct > 0 else "なし (上値を切らない)"
+        tr = (f"高値から -{r.trailing_stop_pct:.0%}"
+              if r.trailing_stop_pct > 0 else "なし")
+        rows.append(
+            f"<tr><td>{html.escape(label)}</td>"
+            f"<td class='num'>-{r.stop_loss_pct:.0%}</td>"
+            f"<td class='num'>{tp}</td><td class='num'>{tr}</td></tr>"
+        )
+    if not rows:
+        return ""
+    return (
+        "<div><h2>出口ルール (損切り・利確)</h2><div class='card'>"
+        "<div class='tblwrap'><table>"
+        "<tr><th>トラック</th><th>損切り</th><th>固定利確</th><th>トレーリング利確</th></tr>"
+        f"{''.join(rows)}</table></div>"
+        "<p class='muted'>判定順は 損切り → 固定利確 → トレーリング利確。"
+        "トレーリングは含み益がある場合のみ作動するため損切りと競合しない。"
+        "2026-09-02に固定利確+20%から移行 (実データ検証で Sharpe 0.84 → 1.04)。</p>"
+        "</div></div>"
+    )
+
+
 def main() -> None:
     live = read_track(os.path.join(ROOT, "state", "live"))
     t1 = read_track(os.path.join(ROOT, "state"))
@@ -591,6 +630,8 @@ td {{ padding:7px 10px; border-bottom:1px solid var(--grid); }}
     <div><h2>直近の取引 — 単元株</h2><div class="card">{trades_table(live['portfolio'])}</div></div>
     <div><h2>直近の取引 — 1株</h2><div class="card">{trades_table(t1['portfolio'])}</div></div>
   </div>
+
+  {exit_rule_card()}
 
   <p class="note">
     毎営業日16:20 JST の自動売買サイクル後に更新。ペーパートレード (仮想売買) の結果であり、

@@ -106,7 +106,9 @@ python main.py measure
 | `initial_capital` | 初期資金（円） |
 | `risk.max_position_weight` | 1銘柄あたりの最大配分比率 |
 | `risk.max_gross_exposure` | 株式全体の最大エクスポージャー |
-| `risk.stop_loss_pct` / `take_profit_pct` | 損切り / 利確ライン |
+| `risk.stop_loss_pct` | 取得価格からの損切りライン |
+| `risk.take_profit_pct` | 固定利確ライン（既定 `0.0` = 無効。上値を切らない） |
+| `risk.trailing_stop_pct` | トレーリング利確：保有中の高値からの下落率で利食う（既定 `0.12`） |
 | `risk.max_daily_var_pct` | 日次VaR(95%)の許容上限 |
 | `execution.mode` | `paper`（既定）。実運用アダプタ実装時のみ変更 |
 

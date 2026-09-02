@@ -91,3 +91,28 @@ def test_take_profit_disabled_when_zero():
 def test_stop_loss_takes_precedence_over_trailing():
     rm = make_rm(stop_loss_pct=0.08, trailing_stop_pct=0.05)
     assert "損切り" in rm.check_exit("X", 1000, 900, peak_price=1010)
+
+
+# ---- 出荷設定の出口ルール --------------------------------------------------
+def test_shipped_configs_use_trailing_exit():
+    """全設定ファイルで「固定利確なし + トレーリング利確」になっていること。
+
+    固定利確は実データ検証(analysis/exit_sweep.py)で伸びる銘柄を早期に
+    手放すことが確認されたため、誤って復活させないよう固定する。
+    """
+    import glob
+    import os
+
+    from autotrader.config import load_config
+
+    root = os.path.join(os.path.dirname(__file__), "..", "config")
+    paths = [p for p in glob.glob(os.path.join(root, "*.yaml"))
+             if "candidates" not in os.path.basename(p)]
+    assert paths, "設定ファイルが見つからない"
+    for path in paths:
+        risk = load_config(path).risk
+        assert risk.take_profit_pct == 0.0, f"{path}: 固定利確が有効になっている"
+        assert risk.trailing_stop_pct > 0, f"{path}: トレーリング利確が無効"
+        # トレーリング幅は損切り幅より広くないと、上昇後の押し目で即座に
+        # 利確されてしまう
+        assert risk.trailing_stop_pct >= risk.stop_loss_pct, path
