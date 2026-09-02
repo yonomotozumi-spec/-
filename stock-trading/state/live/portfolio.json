@@ -4,22 +4,26 @@
     "8309.T": {
       "ticker": "8309.T",
       "quantity": 100,
-      "avg_cost": 1750.37
+      "avg_cost": 1750.37,
+      "peak_price": 1775.0
     },
     "2801.T": {
       "ticker": "2801.T",
       "quantity": 100,
-      "avg_cost": 1837.42
+      "avg_cost": 1837.42,
+      "peak_price": 1837.42
     },
     "9434.T": {
       "ticker": "9434.T",
       "quantity": 1300,
-      "avg_cost": 240.0123076923077
+      "avg_cost": 240.0123076923077,
+      "peak_price": 241.3000030517578
     },
     "7733.T": {
       "ticker": "7733.T",
       "quantity": 100,
-      "avg_cost": 2106.55
+      "avg_cost": 2106.55,
+      "peak_price": 2106.55
     }
   },
   "trades": [

@@ -4,32 +4,38 @@
     "7203.T": {
       "ticker": "7203.T",
       "quantity": 22,
-      "avg_cost": 3131.88
+      "avg_cost": 3131.88,
+      "peak_price": 3133.0
     },
     "6758.T": {
       "ticker": "6758.T",
       "quantity": 18,
-      "avg_cost": 3858.47
+      "avg_cost": 3858.47,
+      "peak_price": 3920.0
     },
     "6501.T": {
       "ticker": "6501.T",
       "quantity": 11,
-      "avg_cost": 5277.59
+      "avg_cost": 5277.59,
+      "peak_price": 5335.0
     },
     "9101.T": {
       "ticker": "9101.T",
       "quantity": 12,
-      "avg_cost": 7215.84
+      "avg_cost": 7215.84,
+      "peak_price": 7215.84
     },
     "2914.T": {
       "ticker": "2914.T",
       "quantity": 15,
-      "avg_cost": 6905.16
+      "avg_cost": 6905.16,
+      "peak_price": 7003.0
     },
     "9434.T": {
       "ticker": "9434.T",
       "quantity": 375,
-      "avg_cost": 235.52
+      "avg_cost": 235.52,
+      "peak_price": 241.3000030517578
     }
   },
   "trades": [
