@@ -72,19 +72,24 @@ class RiskManager:
             return RiskDecision(False, 0, "価格または資産が不正")
 
         # シグナル強度でスケール (score 0.35 -> 約半分, 1.0 -> 満額)
-        target_weight = self.cfg.max_position_weight * min(1.0, abs(signal_score) + 0.3)
+        signal_weight = self.cfg.max_position_weight * min(1.0, abs(signal_score) + 0.3)
+        target_weight = signal_weight
 
         # 銘柄VaRが高いほど配分を絞る (日次VaR 2%を基準に逆比例)
+        var_scale = 1.0
         if returns is not None:
             var = historical_var(returns)
             if var > 0.02:
-                target_weight *= 0.02 / var
+                var_scale = 0.02 / var
+                target_weight *= var_scale
 
         current_value = portfolio.position_value(ticker, price)
         current_weight = current_value / equity
         add_weight = max(0.0, target_weight - current_weight)
         if add_weight <= 0.01:
-            return RiskDecision(False, 0, f"既に配分上限付近 ({current_weight:.0%})")
+            return RiskDecision(
+                False, 0,
+                f"既に配分上限付近 (現在 {current_weight:.0%} / 目標 {target_weight:.0%})")
 
         # 総エクスポージャー制限
         gross = portfolio.gross_exposure({ticker: price})
@@ -96,7 +101,13 @@ class RiskManager:
         budget = min(equity * add_weight, portfolio.cash * 0.98)
         qty = int(budget / price / lot_size) * lot_size
         if qty <= 0:
-            return RiskDecision(False, 0, "予算内で最低単元に届かず")
+            # 単元株モードでは「目標配分は出たが1単元の値段に届かない」ことで
+            # 買いが丸ごと消える。原因の内訳が分かるよう数値を残す。
+            detail = (f"目標配分 {target_weight:.0%} = {equity * add_weight:,.0f}円 "
+                      f"< 1単元 {price * lot_size:,.0f}円")
+            if var_scale < 1.0:
+                detail += f" (シグナル {signal_weight:.0%} をVaRで×{var_scale:.2f}に縮小)"
+            return RiskDecision(False, 0, f"予算内で最低単元に届かず — {detail}")
         return RiskDecision(True, qty, f"目標配分 {target_weight:.0%} に対し {qty} 株")
 
     # ---- ポートフォリオ全体のVaRチェック ----------------------------------
