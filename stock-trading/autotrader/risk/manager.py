@@ -103,8 +103,11 @@ class RiskManager:
         if qty <= 0:
             # 単元株モードでは「目標配分は出たが1単元の値段に届かない」ことで
             # 買いが丸ごと消える。原因の内訳が分かるよう数値を残す。
-            detail = (f"目標配分 {target_weight:.0%} = {equity * add_weight:,.0f}円 "
-                      f"< 1単元 {price * lot_size:,.0f}円")
+            # 既存保有がある場合 equity*add_weight は「積み増し分」であり
+            # 目標配分の全額ではない。取り違えないよう両方を出す。
+            detail = (f"発注可能額 {equity * add_weight:,.0f}円 "
+                      f"< 1単元 {price * lot_size:,.0f}円 "
+                      f"(目標配分 {target_weight:.0%} / 現在 {current_weight:.0%})")
             if var_scale < 1.0:
                 detail += f" (シグナル {signal_weight:.0%} をVaRで×{var_scale:.2f}に縮小)"
             return RiskDecision(False, 0, f"予算内で最低単元に届かず — {detail}")
