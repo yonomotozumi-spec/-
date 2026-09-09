@@ -1,5 +1,5 @@
 {
-  "cash": 617926.6499999999,
+  "cash": 810680.6499999999,
   "positions": {
     "8309.T": {
       "ticker": "8309.T",
@@ -18,12 +18,6 @@
       "quantity": 1300,
       "avg_cost": 240.0123076923077,
       "peak_price": 241.3000030517578
-    },
-    "7733.T": {
-      "ticker": "7733.T",
-      "quantity": 100,
-      "avg_cost": 2106.55,
-      "peak_price": 2106.55
     }
   },
   "trades": [
@@ -86,6 +80,18 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-09-09",
+      "ticker": "7733.T",
+      "side": "SELL",
+      "quantity": 100,
+      "price": 1927.54,
+      "commission": 0.0,
+      "reason": "損切り: 取得比 -8.5% <= -8%",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 2106.55
     }
   ]
 }
