@@ -1,71 +1,71 @@
 {
-  "date": "2026-09-09",
-  "equity": 487645.0,
+  "date": "2026-09-10",
+  "equity": 490044.0,
   "cash": 24868.0,
   "gross_exposure_pct": 94.9,
-  "total_return_pct": -2.47,
+  "total_return_pct": -1.99,
   "holdings": [
     {
       "ticker": "7203.T",
       "quantity": 22,
       "avg_cost": 3131.88,
-      "price": 2971.0,
-      "value": 65362.0,
-      "pnl_pct": -5.14,
+      "price": 2994.0,
+      "value": 65868.0,
+      "pnl_pct": -4.4,
       "weight_pct": 13.4
     },
     {
       "ticker": "6758.T",
       "quantity": 18,
       "avg_cost": 3858.47,
-      "price": 3625.0,
-      "value": 65250.0,
-      "pnl_pct": -6.05,
+      "price": 3640.0,
+      "value": 65520.0,
+      "pnl_pct": -5.66,
       "weight_pct": 13.4
     },
     {
       "ticker": "6501.T",
       "quantity": 11,
       "avg_cost": 5277.59,
-      "price": 5173.0,
-      "value": 56903.0,
-      "pnl_pct": -1.98,
-      "weight_pct": 11.7
+      "price": 5182.0,
+      "value": 57002.0,
+      "pnl_pct": -1.81,
+      "weight_pct": 11.6
     },
     {
       "ticker": "9101.T",
       "quantity": 12,
       "avg_cost": 7215.84,
-      "price": 7201.0,
-      "value": 86412.0,
-      "pnl_pct": -0.21,
-      "weight_pct": 17.7
+      "price": 7198.0,
+      "value": 86376.0,
+      "pnl_pct": -0.25,
+      "weight_pct": 17.6
     },
     {
       "ticker": "2914.T",
       "quantity": 15,
       "avg_cost": 6905.16,
-      "price": 6610.0,
-      "value": 99150.0,
-      "pnl_pct": -4.27,
-      "weight_pct": 20.3
+      "price": 6614.0,
+      "value": 99210.0,
+      "pnl_pct": -4.22,
+      "weight_pct": 20.2
     },
     {
       "ticker": "9434.T",
       "quantity": 375,
       "avg_cost": 235.52,
-      "price": 239.2,
-      "value": 89700.0,
-      "pnl_pct": 1.56,
-      "weight_pct": 18.4
+      "price": 243.2,
+      "value": 91200.0,
+      "pnl_pct": 3.26,
+      "weight_pct": 18.6
     }
   ],
   "risk": {
-    "annual_return": 0.2315,
+    "annual_return": 0.2321,
     "annual_volatility": 0.1779,
-    "sharpe": 1.2956,
-    "sortino": 2.002,
-    "max_drawdown": -0.15,
+    "sharpe": 1.2996,
+    "sortino": 2.0086,
+    "max_drawdown": -0.1498,
     "var_95": 0.0145,
     "cvar_95": 0.0217
   },
