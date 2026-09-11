@@ -111,5 +111,6 @@
       "settled": true,
       "prev_avg_cost": 0.0
     }
-  ]
+  ],
+  "stop_cooldown": {}
 }
