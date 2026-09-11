@@ -25,6 +25,13 @@ class RiskConfig:
     trailing_stop_pct: float = 0.12
     max_daily_var_pct: float = 0.03
     risk_free_rate: float = 0.001
+    # 目標配分が1単元の値段に届かない場合でも、この割合以上あれば
+    # 1単元だけ取得して現金の滞留を防ぐ。0で無効 (従来どおり見送り)。
+    min_lot_fill_ratio: float = 0.5
+    # 損切りした銘柄を新規買いの対象外にする営業日数。0で無効。
+    # 損切りと同一サイクルの逆張りシグナルが同値で買い戻し、取得単価が
+    # リセットされて損切りラインが下がる問題への対処 (2026-09-10 発生)。
+    stop_cooldown_days: int = 5
 
 
 @dataclass

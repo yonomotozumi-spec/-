@@ -116,3 +116,42 @@ def test_shipped_configs_use_trailing_exit():
         # トレーリング幅は損切り幅より広くないと、上昇後の押し目で即座に
         # 利確されてしまう
         assert risk.trailing_stop_pct >= risk.stop_loss_pct, path
+
+
+# ---- 1単元への切り上げ (現金滞留の是正) ---------------------------------
+def test_lot_fill_buys_one_lot_when_budget_is_half():
+    """目標配分が1単元に届かなくても、半単元以上なら1単元だけ取得する"""
+    rm = make_rm(max_position_weight=0.25, min_lot_fill_ratio=0.5)
+    p = Portfolio(cash=1_000_000)
+    # シグナル0.2 → 目標 12.5% = 12.5万円 < 1単元 20万円。半単元10万円は超える。
+    # 1単元は資産の20%で配分上限25%以内なので取得する。
+    d = rm.size_buy(p, "X", price=2000, signal_score=0.2)
+    assert d.approved and d.quantity == 100
+
+
+def test_lot_fill_respects_position_cap():
+    """1単元が配分上限を超える銘柄は切り上げない (スクリーナーで除くべき銘柄)"""
+    rm = make_rm(max_position_weight=0.25, min_lot_fill_ratio=0.5)
+    p = Portfolio(cash=1_000_000)
+    # 1単元 40万円 = 資産の40% で配分上限25%超
+    d = rm.size_buy(p, "X", price=4000, signal_score=1.0)
+    assert not d.approved
+
+
+def test_lot_fill_respects_gross_exposure():
+    """総エクスポージャー上限を超える切り上げはしない"""
+    rm = make_rm(max_position_weight=0.30, max_gross_exposure=0.50,
+                 min_lot_fill_ratio=0.5)
+    p = Portfolio(cash=1_000_000)
+    p.apply_buy("2026-09-11", "A", 450, 1000, 0, "")  # 45%投資済み
+    # 1単元10万円を足すと55%で上限50%を超える
+    d = rm.size_buy(p, "B", price=1000, signal_score=1.0)
+    assert not d.approved
+
+
+def test_lot_fill_disabled_when_ratio_zero():
+    """min_lot_fill_ratio=0 なら従来どおり見送る"""
+    rm = make_rm(max_position_weight=0.25, min_lot_fill_ratio=0.0)
+    p = Portfolio(cash=1_000_000)
+    d = rm.size_buy(p, "X", price=2000, signal_score=0.2)
+    assert not d.approved

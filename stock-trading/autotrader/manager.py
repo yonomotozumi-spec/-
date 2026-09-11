@@ -101,6 +101,13 @@ class TradingManager:
                 )
                 if execute:
                     self._execute(inst, date)
+                    # 損切りした銘柄は一定期間 新規買いの対象から外す。
+                    # 同一サイクルの逆張りシグナルがほぼ同値で買い戻すと
+                    # 取得単価がリセットされ損切りラインが下がってしまうため。
+                    # トレーリング利確での決済には適用しない。
+                    if (inst.executed and exit_reason.startswith("損切り")
+                            and self.cfg.risk.stop_cooldown_days > 0):
+                        self.portfolio.stop_cooldown[ticker] = date
                 result.instructions.append(inst)
 
         # --- 2. 戦略シグナル評価 → 売買指示 ---
@@ -116,6 +123,11 @@ class TradingManager:
                 )
             elif sig.action == "BUY":
                 if buy_allowed is not None and ticker not in buy_allowed:
+                    continue
+                left = self._cooldown_left(ticker, date)
+                if left > 0:
+                    result.warnings.append(
+                        f"{ticker}: 買い見送り (損切り後のクールダウン 残り{left}営業日)")
                     continue
                 decision = self.risk.size_buy(
                     self.portfolio, ticker, price, sig.score, df["ret_1d"],
@@ -143,6 +155,22 @@ class TradingManager:
             self._append_equity_log(date, result.portfolio_summary.get("equity", 0))
             self._save_summary(date, result.portfolio_summary)
         return result
+
+    def _cooldown_left(self, ticker: str, date: str) -> int:
+        """損切り後のクールダウン残り営業日数。対象外なら0。
+
+        期限切れの記録はここで取り除く (状態ファイルが際限なく育たないように)。
+        """
+        days = self.cfg.risk.stop_cooldown_days
+        stopped = self.portfolio.stop_cooldown.get(ticker)
+        if days <= 0 or not stopped:
+            return 0
+        # 決済日の翌営業日から数えて days 営業日を空ける
+        elapsed = max(0, len(pd.bdate_range(stopped, date)) - 1)
+        if elapsed >= days:
+            del self.portfolio.stop_cooldown[ticker]
+            return 0
+        return days - elapsed
 
     def _save_summary(self, date: str, summary: dict) -> None:
         """最新の評価サマリ (保有の現在値・損益込み) をダッシュボード用に保存"""

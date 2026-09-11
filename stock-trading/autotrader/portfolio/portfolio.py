@@ -36,6 +36,8 @@ class Portfolio:
     cash: float
     positions: dict[str, Position] = field(default_factory=dict)
     trades: list[Trade] = field(default_factory=list)
+    # 損切りした銘柄 -> 決済日 (ISO)。一定営業日は新規買いを見送る
+    stop_cooldown: dict[str, str] = field(default_factory=dict)
 
     # ---- 評価 -------------------------------------------------------------
     def position_value(self, ticker: str, price: float) -> float:
@@ -158,6 +160,7 @@ class Portfolio:
             "cash": self.cash,
             "positions": {t: asdict(p) for t, p in self.positions.items()},
             "trades": [asdict(tr) for tr in self.trades],
+            "stop_cooldown": self.stop_cooldown,
         }
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
@@ -173,4 +176,5 @@ class Portfolio:
             cash=data["cash"],
             positions={t: Position(**p) for t, p in data.get("positions", {}).items()},
             trades=[Trade(**tr) for tr in data.get("trades", [])],
+            stop_cooldown=dict(data.get("stop_cooldown", {})),
         )

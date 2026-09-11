@@ -44,6 +44,9 @@ screener:
   max_per_sector: 2
   refresh_days: 30
   universe_file: state/live/universe.json
-  # max_unit_cost_jpy は未指定 → lot_size>=100 のため 150万×25%=37.5万 が自動適用
+  # 1単元の取得コスト上限。自動既定(150万×25%=37.5万)では「配分上限いっぱいを
+  # 割り当てても1単元に届かない」銘柄がプールに入り、買いが丸ごと消えて現金が
+  # 滞留していた (2026-09-04 のログで確認)。15万円に絞り、刻みの細かい銘柄を選ぶ。
+  max_unit_cost_jpy: 150000
 
 state_file: state/live/portfolio.json

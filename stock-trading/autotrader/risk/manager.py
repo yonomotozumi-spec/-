@@ -99,14 +99,28 @@ class RiskManager:
         add_weight = min(add_weight, room)
 
         budget = min(equity * add_weight, portfolio.cash * 0.98)
-        qty = int(budget / price / lot_size) * lot_size
+        lot_cost = price * lot_size
+        qty = int(budget / lot_size / price) * lot_size
         if qty <= 0:
             # 単元株モードでは「目標配分は出たが1単元の値段に届かない」ことで
-            # 買いが丸ごと消える。原因の内訳が分かるよう数値を残す。
-            # 既存保有がある場合 equity*add_weight は「積み増し分」であり
-            # 目標配分の全額ではない。取り違えないよう両方を出す。
-            detail = (f"発注可能額 {equity * add_weight:,.0f}円 "
-                      f"< 1単元 {price * lot_size:,.0f}円 "
+            # 買いが丸ごと消え、現金が滞留する。目標が1単元の一定割合以上あるなら
+            # 1単元だけ取得して端数を拾う。配分上限・総エクスポージャー・現金余力は
+            # いずれも破らない場合に限る。
+            fits = (
+                lot_cost <= portfolio.cash * 0.98
+                and (current_value + lot_cost) / equity
+                <= self.cfg.max_position_weight + 1e-9
+                and gross + lot_cost / equity <= self.cfg.max_gross_exposure + 1e-9
+            )
+            ratio = self.cfg.min_lot_fill_ratio
+            if ratio > 0 and budget >= lot_cost * ratio and fits:
+                return RiskDecision(
+                    True, lot_size,
+                    f"目標配分 {target_weight:.0%} は1単元に満たないが"
+                    f"{ratio:.0%}以上のため1単元 {lot_size} 株を取得")
+            # 既存保有がある場合 budget は「積み増し分」であり目標配分の
+            # 全額ではない。取り違えないよう両方を出す。
+            detail = (f"発注可能額 {budget:,.0f}円 < 1単元 {lot_cost:,.0f}円 "
                       f"(目標配分 {target_weight:.0%} / 現在 {current_weight:.0%})")
             if var_scale < 1.0:
                 detail += f" (シグナル {signal_weight:.0%} をVaRで×{var_scale:.2f}に縮小)"
