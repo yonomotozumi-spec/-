@@ -1,0 +1,55 @@
+# プランB: 最大リスク許容ライン (高リスク)
+#
+# 適用条件: ペーパートレードで実測 Sharpe >= 1.5 が2〜4週間持続した場合のみ
+# 狙い: 2028年末 500万到達 約15% / 200万到達 36% / 破綻(10万未満) 約9%
+#
+# ※ 本来のプランBは信用3倍相当のレバレッジを想定するが、現行システムは
+#    現物(キャッシュ)会計のみのため、レバレッジはマージン対応の実装
+#    (Portfolio/RiskManagerの拡張 + 証券会社API接続) 後に有効化する。
+#    それまでは現物の範囲で最も攻めた設定とする。
+
+universe:
+  - 7203.T
+  - 6758.T
+  - 9984.T
+  - 8306.T
+  - 6501.T
+
+initial_capital: 500000
+
+data:
+  lookback_days: 400
+  interval: "1d"
+
+risk:
+  max_position_weight: 0.35   # 集中投資を許容
+  max_gross_exposure: 1.00    # フルインベストメント
+  stop_loss_pct: 0.12
+  take_profit_pct: 0.0        # 固定利確は無効 (上値を切らない)
+  trailing_stop_pct: 0.15     # トレンド追随を優先するため幅を広げる
+  max_daily_var_pct: 0.05
+  risk_free_rate: 0.001
+
+strategy:
+  momentum_weight: 0.7        # トレンド追随を強める
+  mean_reversion_weight: 0.3
+  buy_threshold: 0.25
+  sell_threshold: -0.30
+
+execution:
+  mode: paper
+  commission_pct: 0.0005
+  slippage_pct: 0.0022      # 単元未満株のスプレッド相当 (楽天かぶミニ0.22%を想定した保守値)
+  lot_size: 1                 # 1株単位 (SBI S株・楽天かぶミニ等の単元未満株を前提)
+
+state_file: state/portfolio.json
+
+# 銘柄スクリーニング (候補プールから月次でユニバースを自動選定)
+screener:
+  enabled: true
+  candidates_file: config/candidates.yaml
+  target_count: 8             # 採用銘柄数
+  min_turnover_jpy: 1000000000  # 60日平均売買代金 10億円/日 以上
+  max_per_sector: 2           # 同一セクターは2銘柄まで
+  refresh_days: 30            # 30日毎に再選定
+  universe_file: state/universe.json

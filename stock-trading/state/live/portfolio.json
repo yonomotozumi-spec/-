@@ -1,0 +1,194 @@
+{
+  "cash": 100814.6499999999,
+  "positions": {
+    "8309.T": {
+      "ticker": "8309.T",
+      "quantity": 100,
+      "avg_cost": 1750.37,
+      "peak_price": 1801.0
+    },
+    "9434.T": {
+      "ticker": "9434.T",
+      "quantity": 1300,
+      "avg_cost": 240.0123076923077,
+      "peak_price": 246.89999389648438
+    },
+    "2801.T": {
+      "ticker": "2801.T",
+      "quantity": 100,
+      "avg_cost": 1683.34,
+      "peak_price": 1683.34
+    },
+    "5401.T": {
+      "ticker": "5401.T",
+      "quantity": 200,
+      "avg_cost": 686.74,
+      "peak_price": 686.74
+    },
+    "9432.T": {
+      "ticker": "9432.T",
+      "quantity": 1800,
+      "avg_cost": 175.79,
+      "peak_price": 175.79
+    },
+    "4005.T": {
+      "ticker": "4005.T",
+      "quantity": 200,
+      "avg_cost": 558.78,
+      "peak_price": 558.78
+    },
+    "5020.T": {
+      "ticker": "5020.T",
+      "quantity": 100,
+      "avg_cost": 1441.72,
+      "peak_price": 1441.72
+    }
+  },
+  "trades": [
+    {
+      "date": "2026-08-26",
+      "ticker": "8309.T",
+      "side": "BUY",
+      "quantity": 100,
+      "price": 1750.37,
+      "commission": 175.04,
+      "reason": "買いシグナル +0.43 [SMA20/60乖離 +5.5%; 20日リターン +3.4%] | [中立] / 目標配分 14% に対し 100 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-08-26",
+      "ticker": "2801.T",
+      "side": "BUY",
+      "quantity": 100,
+      "price": 1837.42,
+      "commission": 183.74,
+      "reason": "買いシグナル +0.60 [SMA20/60乖離 +6.3%; 20日リターン +9.8%] | [RSI 85 だが強い上昇トレンドのため逆張り抑制] / 目標配分 16% に対し 100 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-08-26",
+      "ticker": "9434.T",
+      "side": "BUY",
+      "quantity": 1100,
+      "price": 240.52,
+      "commission": 264.57,
+      "reason": "買いシグナル +0.46 [SMA20/60乖離 +5.5%; 20日リターン +4.2%] | [中立] / 目標配分 19% に対し 1100 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-08-31",
+      "ticker": "7733.T",
+      "side": "BUY",
+      "quantity": 100,
+      "price": 2106.55,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.60 [SMA20/60乖離 +11.5%; 20日リターン +15.7%] | [中立] / 目標配分 14% に対し 100 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-08-31",
+      "ticker": "9434.T",
+      "side": "BUY",
+      "quantity": 200,
+      "price": 237.22,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.53 [SMA20/60乖離 +5.4%; 20日リターン +6.1%] | [RSI 73 だが強い上昇トレンドのため逆張り抑制] / 目標配分 21% に対し 200 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-09-09",
+      "ticker": "7733.T",
+      "side": "SELL",
+      "quantity": 100,
+      "price": 1927.54,
+      "commission": 0.0,
+      "reason": "損切り: 取得比 -8.5% <= -8%",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 2106.55
+    },
+    {
+      "date": "2026-09-10",
+      "ticker": "2801.T",
+      "side": "SELL",
+      "quantity": 100,
+      "price": 1681.66,
+      "commission": 0.0,
+      "reason": "損切り: 取得比 -8.4% <= -8%",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 1837.42
+    },
+    {
+      "date": "2026-09-10",
+      "ticker": "2801.T",
+      "side": "BUY",
+      "quantity": 100,
+      "price": 1683.34,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.50 [SMA20/60乖離 +5.8%; 20日リターン -5.4%] | [RSI 24 売られすぎ; BB -2.3σ 下限割れ] / 目標配分 14% に対し 100 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-09-11",
+      "ticker": "5401.T",
+      "side": "BUY",
+      "quantity": 200,
+      "price": 686.74,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.36 [SMA20/60乖離 +8.6%] | [中立] / 目標配分 14% に対し 200 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-09-11",
+      "ticker": "9432.T",
+      "side": "BUY",
+      "quantity": 1800,
+      "price": 175.79,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.60 [SMA20/60乖離 +7.9%; 20日リターン +8.0%] | [中立] / 目標配分 22% に対し 1800 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-09-11",
+      "ticker": "4005.T",
+      "side": "BUY",
+      "quantity": 200,
+      "price": 558.78,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.50 [SMA20/60乖離 +4.6%; 20日リターン +5.3%] | [中立] / 目標配分 11% に対し 200 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-09-11",
+      "ticker": "5020.T",
+      "side": "BUY",
+      "quantity": 100,
+      "price": 1441.72,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.60 [SMA20/60乖離 +4.5%; 20日リターン +11.6%] | [中立] / 目標配分 14% に対し 100 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
+    }
+  ],
+  "stop_cooldown": {}
+}

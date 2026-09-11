@@ -1,0 +1,51 @@
+name: Paper Trade Daily
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # 平日 16:15 JST (東証引け後) — スケジュール起動はデフォルトブランチのみ有効
+    - cron: "15 7 * * 1-5"
+  push:
+    # ブランチ上から起動する場合は .trigger-paper-trade を更新してpushする
+    branches: ["claude/stock-auto-trading-system-neb2u1"]
+    paths: ["stock-trading/.trigger-paper-trade"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stock-trading-state
+  cancel-in-progress: false
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: stock-trading
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Refresh universe if stale (monthly screening)
+        run: python main.py screen --if-stale | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Run paper trading cycle
+        run: python main.py run | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Measure realized performance
+        run: python main.py measure | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: "Live-mode track (150万・単元株): screening"
+        run: python main.py screen --config config/planLive.yaml --if-stale | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: "Live-mode track (150万・単元株): trading cycle"
+        run: python main.py run --config config/planLive.yaml | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: "Live-mode track (150万・単元株): measure"
+        run: python main.py measure --config config/planLive.yaml | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Commit portfolio state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state
+          git diff --cached --quiet || git commit -m "paper-trade: 日次サイクルの状態を更新"
+          git push
