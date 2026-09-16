@@ -35,13 +35,13 @@
       "ticker": "4005.T",
       "quantity": 200,
       "avg_cost": 558.78,
-      "peak_price": 560.5
+      "peak_price": 580.0
     },
     "5020.T": {
       "ticker": "5020.T",
       "quantity": 100,
       "avg_cost": 1441.72,
-      "peak_price": 1441.72
+      "peak_price": 1474.0
     }
   },
   "trades": [
