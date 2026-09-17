@@ -11,7 +11,7 @@
       "ticker": "9434.T",
       "quantity": 1300,
       "avg_cost": 240.0123076923077,
-      "peak_price": 250.8000030517578
+      "peak_price": 251.60000610351562
     },
     "2801.T": {
       "ticker": "2801.T",
@@ -23,19 +23,19 @@
       "ticker": "5401.T",
       "quantity": 200,
       "avg_cost": 686.74,
-      "peak_price": 686.74
+      "peak_price": 702.5999755859375
     },
     "9432.T": {
       "ticker": "9432.T",
       "quantity": 1800,
       "avg_cost": 175.79,
-      "peak_price": 178.3000030517578
+      "peak_price": 180.0
     },
     "4005.T": {
       "ticker": "4005.T",
       "quantity": 200,
       "avg_cost": 558.78,
-      "peak_price": 580.0
+      "peak_price": 597.5999755859375
     },
     "5020.T": {
       "ticker": "5020.T",
