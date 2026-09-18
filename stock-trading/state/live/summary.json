@@ -1,0 +1,82 @@
+{
+  "date": "2026-09-18",
+  "equity": 1483025.0,
+  "cash": 100815.0,
+  "gross_exposure_pct": 93.2,
+  "total_return_pct": -1.13,
+  "holdings": [
+    {
+      "ticker": "8309.T",
+      "quantity": 100,
+      "avg_cost": 1750.37,
+      "price": 1768.5,
+      "value": 176850.0,
+      "pnl_pct": 1.04,
+      "weight_pct": 11.9
+    },
+    {
+      "ticker": "9434.T",
+      "quantity": 1300,
+      "avg_cost": 240.01,
+      "price": 248.1,
+      "value": 322530.0,
+      "pnl_pct": 3.37,
+      "weight_pct": 21.7
+    },
+    {
+      "ticker": "2801.T",
+      "quantity": 100,
+      "avg_cost": 1683.34,
+      "price": 1655.0,
+      "value": 165500.0,
+      "pnl_pct": -1.68,
+      "weight_pct": 11.2
+    },
+    {
+      "ticker": "5401.T",
+      "quantity": 200,
+      "avg_cost": 686.74,
+      "price": 695.0,
+      "value": 139000.0,
+      "pnl_pct": 1.2,
+      "weight_pct": 9.4
+    },
+    {
+      "ticker": "9432.T",
+      "quantity": 1800,
+      "avg_cost": 175.79,
+      "price": 177.3,
+      "value": 319140.0,
+      "pnl_pct": 0.86,
+      "weight_pct": 21.5
+    },
+    {
+      "ticker": "4005.T",
+      "quantity": 200,
+      "avg_cost": 558.78,
+      "price": 580.2,
+      "value": 116040.0,
+      "pnl_pct": 3.83,
+      "weight_pct": 7.8
+    },
+    {
+      "ticker": "5020.T",
+      "quantity": 100,
+      "avg_cost": 1441.72,
+      "price": 1431.5,
+      "value": 143150.0,
+      "pnl_pct": -0.71,
+      "weight_pct": 9.7
+    }
+  ],
+  "risk": {
+    "annual_return": 0.2322,
+    "annual_volatility": 0.1476,
+    "sharpe": 1.5658,
+    "sortino": 2.319,
+    "max_drawdown": -0.131,
+    "var_95": 0.0126,
+    "cvar_95": 0.0188
+  },
+  "var_within_limit": true
+}
