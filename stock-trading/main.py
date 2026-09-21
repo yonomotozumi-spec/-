@@ -163,6 +163,27 @@ def screen(cfg, if_stale: bool) -> None:
         print(f"  {mark} {r.ticker:8s} [{r.sector}] score={r.score:+.2f}  {r.reason}")
 
 
+def latest_session_date(data: dict) -> "dt.date":
+    """取得済みデータの中で最も新しい取引日を返す"""
+    import datetime as dt  # noqa: F401  (型注釈用)
+
+    return max(df.index[-1].date() for df in data.values())
+
+
+def is_market_closed_today(data: dict) -> tuple[bool, "dt.date", "dt.date"]:
+    """本日(JST)が休場日かを、最新の取引日と比べて判定する。
+
+    祝日・休日に run を回すと「変動ゼロの日」が資産推移に積み上がり、
+    ボラティリティが過小評価されてSharpeが実態より良く見えてしまう。
+    そのため休場日は状態を更新しない。
+    """
+    import datetime as dt
+
+    latest = latest_session_date(data)
+    today = dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date()
+    return latest < today, latest, today
+
+
 def resolve_universe(cfg) -> tuple[list[str], set[str] | None]:
     """設定とスクリーニング結果から (データ取得銘柄, 買い許可銘柄) を決める
 
@@ -226,9 +247,17 @@ def main() -> None:
         raise SystemExit("エラー: 全銘柄のデータ取得に失敗しました。ネットワークを確認してください")
 
     if args.command in ("advise", "run"):
+        closed, latest, today = is_market_closed_today(data)
+        if closed and args.command == "run":
+            print(f"\n休場日のためサイクルをスキップしました "
+                  f"(最新の取引日 {latest} / 本日 {today})")
+            print("  変動ゼロの日を資産推移に積むとボラティリティが過小評価され、"
+                  "Sharpeが実態より良く見えるため記録しません")
+            return
         manager = TradingManager(cfg)
         result = manager.run_cycle(
-            data, execute=(args.command == "run"), buy_allowed=buy_allowed
+            data, execute=(args.command == "run"), buy_allowed=buy_allowed,
+            as_of=latest.isoformat(),
         )
         if args.json:
             print(json.dumps(
