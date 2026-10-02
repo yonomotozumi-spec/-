@@ -1,12 +1,6 @@
 {
-  "cash": 24867.749999999985,
+  "cash": 87541.23999999999,
   "positions": {
-    "7203.T": {
-      "ticker": "7203.T",
-      "quantity": 22,
-      "avg_cost": 3131.88,
-      "peak_price": 3133.0
-    },
     "6758.T": {
       "ticker": "6758.T",
       "quantity": 18,
@@ -110,7 +104,21 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-10-02",
+      "ticker": "7203.T",
+      "side": "SELL",
+      "quantity": 22,
+      "price": 2850.22,
+      "commission": 31.35,
+      "reason": "損切り: 取得比 -8.8% <= -8%",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 3131.88
     }
   ],
-  "stop_cooldown": {}
+  "stop_cooldown": {
+    "7203.T": "2026-10-02"
+  }
 }
