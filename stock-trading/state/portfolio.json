@@ -11,7 +11,7 @@
       "ticker": "6501.T",
       "quantity": 11,
       "avg_cost": 5277.59,
-      "peak_price": 5642.0
+      "peak_price": 5660.0
     },
     "9101.T": {
       "ticker": "9101.T",
@@ -35,13 +35,13 @@
       "ticker": "6098.T",
       "quantity": 2,
       "avg_cost": 16671.6,
-      "peak_price": 16671.6
+      "peak_price": 16975.0
     },
     "8309.T": {
       "ticker": "8309.T",
       "quantity": 16,
       "avg_cost": 1758.86,
-      "peak_price": 1758.86
+      "peak_price": 1796.5
     }
   },
   "trades": [
