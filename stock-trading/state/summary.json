@@ -1,80 +1,80 @@
 {
-  "date": "2026-10-07",
-  "equity": 497827.0,
+  "date": "2026-10-08",
+  "equity": 497564.0,
   "cash": 26026.0,
   "gross_exposure_pct": 94.8,
-  "total_return_pct": -0.43,
+  "total_return_pct": -0.49,
   "holdings": [
     {
       "ticker": "6758.T",
       "quantity": 18,
       "avg_cost": 3858.47,
-      "price": 3743.0,
-      "value": 67374.0,
-      "pnl_pct": -2.99,
-      "weight_pct": 13.5
+      "price": 3706.0,
+      "value": 66708.0,
+      "pnl_pct": -3.95,
+      "weight_pct": 13.4
     },
     {
       "ticker": "6501.T",
       "quantity": 11,
       "avg_cost": 5277.59,
-      "price": 5649.0,
-      "value": 62139.0,
-      "pnl_pct": 7.04,
-      "weight_pct": 12.5
+      "price": 5597.0,
+      "value": 61567.0,
+      "pnl_pct": 6.05,
+      "weight_pct": 12.4
     },
     {
       "ticker": "9101.T",
       "quantity": 12,
       "avg_cost": 7215.84,
-      "price": 7092.0,
-      "value": 85104.0,
-      "pnl_pct": -1.72,
-      "weight_pct": 17.1
+      "price": 7226.0,
+      "value": 86712.0,
+      "pnl_pct": 0.14,
+      "weight_pct": 17.4
     },
     {
       "ticker": "2914.T",
       "quantity": 15,
       "avg_cost": 6905.16,
-      "price": 6990.0,
-      "value": 104850.0,
-      "pnl_pct": 1.23,
-      "weight_pct": 21.1
+      "price": 6960.0,
+      "value": 104400.0,
+      "pnl_pct": 0.79,
+      "weight_pct": 21.0
     },
     {
       "ticker": "9434.T",
       "quantity": 375,
       "avg_cost": 235.52,
-      "price": 240.7,
-      "value": 90262.0,
-      "pnl_pct": 2.2,
-      "weight_pct": 18.1
+      "price": 241.3,
+      "value": 90488.0,
+      "pnl_pct": 2.45,
+      "weight_pct": 18.2
     },
     {
       "ticker": "6098.T",
       "quantity": 2,
       "avg_cost": 16671.6,
-      "price": 17000.0,
-      "value": 34000.0,
-      "pnl_pct": 1.97,
-      "weight_pct": 6.8
+      "price": 17200.0,
+      "value": 34400.0,
+      "pnl_pct": 3.17,
+      "weight_pct": 6.9
     },
     {
       "ticker": "8309.T",
       "quantity": 16,
       "avg_cost": 1758.86,
-      "price": 1754.5,
-      "value": 28072.0,
-      "pnl_pct": -0.25,
-      "weight_pct": 5.6
+      "price": 1704.0,
+      "value": 27264.0,
+      "pnl_pct": -3.12,
+      "weight_pct": 5.5
     }
   ],
   "risk": {
-    "annual_return": 0.2919,
-    "annual_volatility": 0.1796,
-    "sharpe": 1.6196,
-    "sortino": 2.4234,
-    "max_drawdown": -0.152,
+    "annual_return": 0.2902,
+    "annual_volatility": 0.1794,
+    "sharpe": 1.6123,
+    "sortino": 2.411,
+    "max_drawdown": -0.1517,
     "var_95": 0.0143,
     "cvar_95": 0.0219
   },
