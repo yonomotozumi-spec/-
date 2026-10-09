@@ -1,0 +1,95 @@
+{
+  "as_of": "2026-09-11",
+  "tickers": [
+    "9434.T",
+    "5401.T",
+    "9432.T",
+    "4188.T",
+    "4005.T",
+    "7261.T",
+    "5020.T",
+    "4755.T"
+  ],
+  "details": [
+    {
+      "ticker": "9434.T",
+      "sector": "通信",
+      "score": 0.9617751717367561,
+      "momentum_120d": 0.1681652049475082,
+      "volatility": 0.19513814097080662,
+      "turnover_avg_jpy": 17808076184.282482,
+      "selected": true,
+      "reason": "mom120 +16.8% / vol 20% / 代金 178億円"
+    },
+    {
+      "ticker": "5401.T",
+      "sector": "鉄鋼",
+      "score": 0.8348841752518573,
+      "momentum_120d": 0.18184172201590676,
+      "volatility": 0.24744269660397367,
+      "turnover_avg_jpy": 25329381675.183105,
+      "selected": true,
+      "reason": "mom120 +18.2% / vol 25% / 代金 253億円"
+    },
+    {
+      "ticker": "9432.T",
+      "sector": "通信",
+      "score": 0.8126343959191351,
+      "momentum_120d": 0.12659487629952215,
+      "volatility": 0.17764351120919972,
+      "turnover_avg_jpy": 37543698789.55147,
+      "selected": true,
+      "reason": "mom120 +12.7% / vol 18% / 代金 375億円"
+    },
+    {
+      "ticker": "4188.T",
+      "sector": "化学",
+      "score": 0.7937667275457084,
+      "momentum_120d": 0.2968236126921895,
+      "volatility": 0.42784354006460107,
+      "turnover_avg_jpy": 7281594350.0,
+      "selected": true,
+      "reason": "mom120 +29.7% / vol 43% / 代金 73億円"
+    },
+    {
+      "ticker": "4005.T",
+      "sector": "化学",
+      "score": 0.496415487171898,
+      "momentum_120d": 0.17311505354646117,
+      "volatility": 0.43670103502135155,
+      "turnover_avg_jpy": 7319635790.904948,
+      "selected": true,
+      "reason": "mom120 +17.3% / vol 44% / 代金 73億円"
+    },
+    {
+      "ticker": "7261.T",
+      "sector": "自動車",
+      "score": 0.3140092024372788,
+      "momentum_120d": 0.07556471904296891,
+      "volatility": 0.3530909801185545,
+      "turnover_avg_jpy": 8220595499.166667,
+      "selected": true,
+      "reason": "mom120 +7.6% / vol 35% / 代金 82億円"
+    },
+    {
+      "ticker": "5020.T",
+      "sector": "エネルギー",
+      "score": 0.29410670191249855,
+      "momentum_120d": 0.0663853005474353,
+      "volatility": 0.342004165200649,
+      "turnover_avg_jpy": 10217718005.0,
+      "selected": true,
+      "reason": "mom120 +6.6% / vol 34% / 代金 102億円"
+    },
+    {
+      "ticker": "4755.T",
+      "sector": "サービス",
+      "score": -0.10681196923216256,
+      "momentum_120d": -0.04096938763002356,
+      "volatility": 0.3835655116607204,
+      "turnover_avg_jpy": 12794830789.125875,
+      "selected": true,
+      "reason": "mom120 -4.1% / vol 38% / 代金 128億円"
+    }
+  ]
+}
