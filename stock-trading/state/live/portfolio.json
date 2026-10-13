@@ -1,5 +1,5 @@
 {
-  "cash": 391678.6499999999,
+  "cash": 178130.6499999999,
   "positions": {
     "8309.T": {
       "ticker": "8309.T",
@@ -30,6 +30,12 @@
       "quantity": 100,
       "avg_cost": 1441.72,
       "peak_price": 1474.0
+    },
+    "8766.T": {
+      "ticker": "8766.T",
+      "quantity": 400,
+      "avg_cost": 533.87,
+      "peak_price": 533.87
     }
   },
   "trades": [
@@ -200,6 +206,18 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 686.74
+    },
+    {
+      "date": "2026-10-13",
+      "ticker": "8766.T",
+      "side": "BUY",
+      "quantity": 400,
+      "price": 533.87,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.60 [SMA20/60乖離 +10.8%; 20日リターン +34.6%] | [RSI 75 だが強い上昇トレンドのため逆張り抑制] / 目標配分 17% に対し 400 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
     }
   ],
   "stop_cooldown": {

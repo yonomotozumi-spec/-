@@ -1,9 +1,9 @@
 {
-  "date": "2026-10-09",
-  "equity": 507043.0,
+  "date": "2026-10-13",
+  "equity": 513436.0,
   "cash": 26026.0,
   "gross_exposure_pct": 94.9,
-  "total_return_pct": 1.41,
+  "total_return_pct": 2.69,
   "holdings": [
     {
       "ticker": "6758.T",
@@ -12,71 +12,71 @@
       "price": 3814.0,
       "value": 68652.0,
       "pnl_pct": -1.15,
-      "weight_pct": 13.5
+      "weight_pct": 13.4
     },
     {
       "ticker": "6501.T",
       "quantity": 11,
       "avg_cost": 5277.59,
-      "price": 5669.0,
-      "value": 62359.0,
-      "pnl_pct": 7.42,
+      "price": 5764.0,
+      "value": 63404.0,
+      "pnl_pct": 9.22,
       "weight_pct": 12.3
     },
     {
       "ticker": "9101.T",
       "quantity": 12,
       "avg_cost": 7215.84,
-      "price": 7358.0,
-      "value": 88296.0,
-      "pnl_pct": 1.97,
-      "weight_pct": 17.4
+      "price": 7557.0,
+      "value": 90684.0,
+      "pnl_pct": 4.73,
+      "weight_pct": 17.7
     },
     {
       "ticker": "2914.T",
       "quantity": 15,
       "avg_cost": 6905.16,
-      "price": 7230.0,
-      "value": 108450.0,
-      "pnl_pct": 4.7,
+      "price": 7319.0,
+      "value": 109785.0,
+      "pnl_pct": 5.99,
       "weight_pct": 21.4
     },
     {
       "ticker": "9434.T",
       "quantity": 375,
       "avg_cost": 235.52,
-      "price": 242.0,
-      "value": 90750.0,
-      "pnl_pct": 2.75,
-      "weight_pct": 17.9
+      "price": 243.0,
+      "value": 91125.0,
+      "pnl_pct": 3.18,
+      "weight_pct": 17.7
     },
     {
       "ticker": "6098.T",
       "quantity": 2,
       "avg_cost": 16671.6,
-      "price": 17755.0,
-      "value": 35510.0,
-      "pnl_pct": 6.5,
+      "price": 18020.0,
+      "value": 36040.0,
+      "pnl_pct": 8.09,
       "weight_pct": 7.0
     },
     {
       "ticker": "8309.T",
       "quantity": 16,
       "avg_cost": 1758.86,
-      "price": 1687.5,
-      "value": 27000.0,
-      "pnl_pct": -4.06,
-      "weight_pct": 5.3
+      "price": 1732.5,
+      "value": 27720.0,
+      "pnl_pct": -1.5,
+      "weight_pct": 5.4
     }
   ],
   "risk": {
-    "annual_return": 0.3092,
-    "annual_volatility": 0.1802,
-    "sharpe": 1.7105,
-    "sortino": 2.5605,
-    "max_drawdown": -0.1516,
+    "annual_return": 0.352,
+    "annual_volatility": 0.18,
+    "sharpe": 1.9505,
+    "sortino": 2.901,
+    "max_drawdown": -0.1519,
     "var_95": 0.0144,
-    "cvar_95": 0.0219
+    "cvar_95": 0.022
   },
   "var_within_limit": true
 }
