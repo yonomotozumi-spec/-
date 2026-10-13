@@ -55,16 +55,24 @@ def metrics(curve: pd.Series, rf: float = 0.001) -> dict:
     )
 
 
-def run(base, tickers, lookback, start):
+def run(base, tickers, lookback, start, commission=None, slippage=None):
     cfg = copy.deepcopy(base)
     cfg.universe = list(tickers)
     cfg.screener.enabled = False
     cfg.execution.lot_size = 1   # 米国株に単元はなく、比較のため日本株側も1株に揃える
+    if commission is not None:
+        cfg.execution.commission_pct = commission
+    if slippage is not None:
+        cfg.execution.slippage_pct = slippage
     data = collect_market_data(tickers, lookback, cfg.data.interval)
     if not data:
         raise SystemExit("データ取得に失敗しました")
     res = BacktestEngine(cfg).run(data, start=start)
     return res, sorted(data)
+
+
+def trade_count(res) -> int:
+    return len([t for t in res.trades if getattr(t, "quantity", 0) > 0])
 
 
 def main() -> None:
@@ -78,12 +86,20 @@ def main() -> None:
     since = (dt.date.today() - dt.date.fromisoformat(args.start)).days
     lookback = max(base.data.lookback_days, since + 150)
 
+    # 日本株: SOR注文で手数料0・スリッページ0.05% (現行の実運用条件)
+    # 米国株: 売買手数料0.495% + 為替スプレッド片道0.17% をスリッページに加算
+    #         (1ドル150円・25銭/ドル想定)
+    CASES = [
+        ("日本株 (手数料0)", JP, 0.0, 0.0005),
+        ("米国株 (コスト抜き)", US, 0.0, 0.0005),
+        ("米国株 (手数料+為替込み)", US, 0.00495, 0.0022),
+    ]
     results = {}
-    for name, tickers in (("日本株", JP), ("米国株", US)):
+    for name, tickers, comm, slip in CASES:
         print(f"{name} {len(tickers)}銘柄を収集・検証中...")
-        res, got = run(base, tickers, lookback, args.start)
+        res, got = run(base, tickers, lookback, args.start, comm, slip)
         results[name] = res
-        print(f"  取得できた銘柄: {len(got)} / {len(tickers)}")
+        print(f"  銘柄 {len(got)}/{len(tickers)} / 売買 {trade_count(res)}件")
 
     lines = [
         f"# ユニバース比較 (開始 {args.start} / 初期資金 {base.initial_capital:,.0f} / 1株単位)",
@@ -92,26 +108,28 @@ def main() -> None:
         "**混合ポートフォリオは測定していない** (Portfolio が通貨を持たないため、",
         "円とドルを混ぜると価格が同一視され結果が無意味になる)。",
         "",
-        "| ユニバース | 通算 | 年率 | ボラ | Sharpe | Sortino | 最大DD |",
-        "|---|---|---|---|---|---|---|",
+        "| ユニバース | 通算 | 年率 | ボラ | Sharpe | Sortino | 最大DD | 売買 |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for name, res in results.items():
         m = metrics(res.equity_curve)
         lines.append(
             f"| {name} | {m['total']:+.1%} | {m['ann']:+.1%} | {m['vol']:.1%} "
-            f"| {m['sharpe']:.2f} | {m['sortino']:.2f} | {m['dd']:.1%} |"
+            f"| {m['sharpe']:.2f} | {m['sortino']:.2f} | {m['dd']:.1%} "
+            f"| {trade_count(res)}回 |"
         )
 
     # 分散効果: 2本の日次リターンの相関と、50:50で持った場合の指標
-    a = results["日本株"].equity_curve.pct_change().dropna()
-    b = results["米国株"].equity_curve.pct_change().dropna()
+    a = results["日本株 (手数料0)"].equity_curve.pct_change().dropna()
+    b = results["米国株 (手数料+為替込み)"].equity_curve.pct_change().dropna()
     joined = pd.concat([a.rename("jp"), b.rename("us")], axis=1).dropna()
     corr = joined["jp"].corr(joined["us"])
     blend = (1 + joined.mean(axis=1)).cumprod() * base.initial_capital
     bm = metrics(blend)
     lines += [
-        f"| **50:50 合成** | {bm['total']:+.1%} | {bm['ann']:+.1%} | {bm['vol']:.1%} "
-        f"| **{bm['sharpe']:.2f}** | {bm['sortino']:.2f} | {bm['dd']:.1%} |",
+        f"| **50:50 合成 (コスト込み)** | {bm['total']:+.1%} | {bm['ann']:+.1%} "
+        f"| {bm['vol']:.1%} | **{bm['sharpe']:.2f}** | {bm['sortino']:.2f} "
+        f"| {bm['dd']:.1%} | — |",
         "",
         "## 分散効果",
         "",
