@@ -16,14 +16,14 @@ def badge(d,xy,s,size=40):
     f=ImageFont.truetype(F,size); x,y=xy; b=d.textbbox((x,y),s,font=f)
     d.rounded_rectangle((b[0]-22,b[1]-14,b[2]+22,b[3]+14),30,fill=(255,214,102)); d.text((x,y),s,font=f,fill=(40,40,90))
 # 案A：大きなお月さま（カット13）＋下にタイトル
-im=base('カット13_おつきさまのそば_v1.png'); im=shade(im,(60,470,1220,720),170)
+im=base('カット13_おつきさまのそば_v2.png'); im=shade(im,(60,470,1220,720),170)
 d=ImageDraw.Draw(im)
 text(d,(640,560),'おつきさまのこぶね',104,(255,246,214),anchor='mm')
 text(d,(640,660),'どうぶつたちに おやすみを いいにいこう',44,(255,255,255),sw=6,anchor='mm')
 badge(d,(40,36),'ねかしつけ アニメ',40)
 im.save('サムネ案A_お月さま.jpg',quality=90)
 # 案B：ふくろうとさく（カット5）＋右上にタイトル
-im=base('カット05_ふくろうの木_v1.png'); im=shade(im,(560,20,1270,330),160)
+im=base('カット05_ふくろうの木_v2.png'); im=shade(im,(560,20,1270,330),160)
 d=ImageDraw.Draw(im)
 text(d,(915,120),'おつきさまの',78,(255,246,214),anchor='mm')
 text(d,(915,215),'こぶね',118,(255,246,214),anchor='mm')
@@ -31,7 +31,7 @@ text(d,(915,300),'ふくろうさん、おやすみ',40,(255,255,255),sw=6,ancho
 badge(d,(40,640),'ねかしつけ アニメ・約5分',36)
 im.save('サムネ案B_ふくろう.jpg',quality=90)
 # 案C：くじらとさく（カット10）＋上にタイトル
-im=base('カット10_くじらの海_v1.png'); im=shade(im,(40,10,1240,250),150)
+im=base('カット10_くじらの海_v2.png'); im=shade(im,(40,10,1240,250),150)
 d=ImageDraw.Draw(im)
 text(d,(640,105),'おつきさまのこぶね',100,(255,246,214),anchor='mm')
 text(d,(640,200),'8ひきの どうぶつに おやすみ',46,(255,255,255),sw=6,anchor='mm')
