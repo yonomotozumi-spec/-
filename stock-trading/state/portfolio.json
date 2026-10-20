@@ -1,5 +1,5 @@
 {
-  "cash": 26025.539999999997,
+  "cash": 26505.85,
   "positions": {
     "6758.T": {
       "ticker": "6758.T",
@@ -11,7 +11,7 @@
       "ticker": "6501.T",
       "quantity": 11,
       "avg_cost": 5277.59,
-      "peak_price": 5809.0
+      "peak_price": 5810.0
     },
     "9101.T": {
       "ticker": "9101.T",
@@ -23,7 +23,7 @@
       "ticker": "2914.T",
       "quantity": 15,
       "avg_cost": 6905.16,
-      "peak_price": 7500.0
+      "peak_price": 7518.0
     },
     "9434.T": {
       "ticker": "9434.T",
@@ -33,15 +33,15 @@
     },
     "6098.T": {
       "ticker": "6098.T",
-      "quantity": 2,
-      "avg_cost": 16671.6,
-      "peak_price": 18775.0
+      "quantity": 3,
+      "avg_cost": 17394.853333333333,
+      "peak_price": 18800.0
     },
-    "8309.T": {
-      "ticker": "8309.T",
-      "quantity": 16,
-      "avg_cost": 1758.86,
-      "peak_price": 1796.5
+    "7832.T": {
+      "ticker": "7832.T",
+      "quantity": 1,
+      "avg_cost": 6396.04,
+      "peak_price": 6396.04
     }
   },
   "trades": [
@@ -152,9 +152,46 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-10-20",
+      "ticker": "8309.T",
+      "side": "SELL",
+      "quantity": 16,
+      "price": 1608.95,
+      "commission": 12.87,
+      "reason": "損切り: 取得比 -8.3% <= -8%",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 1758.86
+    },
+    {
+      "date": "2026-10-20",
+      "ticker": "6098.T",
+      "side": "BUY",
+      "quantity": 1,
+      "price": 18841.36,
+      "commission": 9.42,
+      "reason": "買いシグナル +0.60 [SMA20/60乖離 +8.9%; 20日リターン +9.7%] | [RSI 93 だが強い上昇トレンドのため逆張り抑制] / 目標配分 10% は1単元に満たないが50%以上のため1単元 1 株を取得",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 16671.6
+    },
+    {
+      "date": "2026-10-20",
+      "ticker": "7832.T",
+      "side": "BUY",
+      "quantity": 1,
+      "price": 6396.04,
+      "commission": 3.2,
+      "reason": "買いシグナル +0.60 [SMA20/60乖離 +8.1%; 20日リターン +17.4%] | [RSI 86 だが強い上昇トレンドのため逆張り抑制] / 目標配分 16% に対し 1 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
     }
   ],
   "stop_cooldown": {
-    "7203.T": "2026-10-02"
+    "7203.T": "2026-10-02",
+    "8309.T": "2026-10-20"
   }
 }
