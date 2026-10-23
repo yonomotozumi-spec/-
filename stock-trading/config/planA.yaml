@@ -1,0 +1,51 @@
+# プランA: 攻めつつ生存重視 (標準・推奨)
+#
+# 適用条件: ペーパートレード実測 Sharpe 0.5〜1.5
+# 狙い: 2028年末 中央値 120〜130万 / 100万超え確率 56〜70% / 破綻リスクほぼゼロ
+# 現物のみ。信用取引(1.5〜2倍)は証券会社API接続とマージン対応実装後に検討。
+
+universe:
+  - 7203.T   # トヨタ自動車
+  - 6758.T   # ソニーグループ
+  - 9984.T   # ソフトバンクグループ
+  - 8306.T   # 三菱UFJフィナンシャル・グループ
+  - 6501.T   # 日立製作所
+
+initial_capital: 500000
+
+data:
+  lookback_days: 400
+  interval: "1d"
+
+risk:
+  max_position_weight: 0.25   # 資金50万では分散に限界があるため1銘柄25%まで許容
+  max_gross_exposure: 0.95
+  stop_loss_pct: 0.10
+  take_profit_pct: 0.0        # 固定利確は無効 (上値を切らない)
+  trailing_stop_pct: 0.12     # 高値から-12%で利確
+  max_daily_var_pct: 0.035
+  risk_free_rate: 0.001
+
+strategy:
+  momentum_weight: 0.6
+  mean_reversion_weight: 0.4
+  buy_threshold: 0.30
+  sell_threshold: -0.35
+
+execution:
+  mode: paper
+  commission_pct: 0.0005
+  slippage_pct: 0.0022      # 単元未満株のスプレッド相当 (楽天かぶミニ0.22%を想定した保守値)
+  lot_size: 1                 # 1株単位 (SBI S株・楽天かぶミニ等の単元未満株を前提)
+
+state_file: state/portfolio.json
+
+# 銘柄スクリーニング (候補プールから月次でユニバースを自動選定)
+screener:
+  enabled: true
+  candidates_file: config/candidates.yaml
+  target_count: 8             # 採用銘柄数
+  min_turnover_jpy: 1000000000  # 60日平均売買代金 10億円/日 以上
+  max_per_sector: 2           # 同一セクターは2銘柄まで
+  refresh_days: 30            # 30日毎に再選定
+  universe_file: state/universe.json
