@@ -1,63 +1,63 @@
 {
-  "date": "2026-10-27",
-  "equity": 1453525.0,
+  "date": "2026-10-28",
+  "equity": 1432545.0,
   "cash": 285125.0,
-  "gross_exposure_pct": 80.4,
-  "total_return_pct": -3.1,
+  "gross_exposure_pct": 80.1,
+  "total_return_pct": -4.5,
   "holdings": [
     {
       "ticker": "9434.T",
       "quantity": 1300,
       "avg_cost": 240.01,
-      "price": 233.3,
-      "value": 303290.0,
-      "pnl_pct": -2.8,
+      "price": 230.7,
+      "value": 299910.0,
+      "pnl_pct": -3.88,
       "weight_pct": 20.9
     },
     {
       "ticker": "9432.T",
       "quantity": 1800,
       "avg_cost": 175.79,
-      "price": 174.0,
-      "value": 313200.0,
-      "pnl_pct": -1.02,
-      "weight_pct": 21.5
+      "price": 171.9,
+      "value": 309420.0,
+      "pnl_pct": -2.21,
+      "weight_pct": 21.6
     },
     {
       "ticker": "4005.T",
       "quantity": 200,
       "avg_cost": 558.78,
-      "price": 583.3,
-      "value": 116660.0,
-      "pnl_pct": 4.39,
-      "weight_pct": 8.0
+      "price": 588.2,
+      "value": 117640.0,
+      "pnl_pct": 5.27,
+      "weight_pct": 8.2
     },
     {
       "ticker": "5020.T",
       "quantity": 100,
       "avg_cost": 1441.72,
-      "price": 1459.5,
-      "value": 145950.0,
-      "pnl_pct": 1.23,
+      "price": 1429.5,
+      "value": 142950.0,
+      "pnl_pct": -0.85,
       "weight_pct": 10.0
     },
     {
       "ticker": "8766.T",
       "quantity": 500,
       "avg_cost": 532.95,
-      "price": 578.6,
-      "value": 289300.0,
-      "pnl_pct": 8.57,
-      "weight_pct": 19.9
+      "price": 555.0,
+      "value": 277500.0,
+      "pnl_pct": 4.14,
+      "weight_pct": 19.4
     }
   ],
   "risk": {
-    "annual_return": 0.2723,
-    "annual_volatility": 0.1549,
-    "sharpe": 1.7515,
-    "sortino": 2.7196,
-    "max_drawdown": -0.1265,
-    "var_95": 0.0124,
+    "annual_return": 0.2582,
+    "annual_volatility": 0.1536,
+    "sharpe": 1.6741,
+    "sortino": 2.5961,
+    "max_drawdown": -0.1255,
+    "var_95": 0.0123,
     "cvar_95": 0.0185
   },
   "var_within_limit": true
