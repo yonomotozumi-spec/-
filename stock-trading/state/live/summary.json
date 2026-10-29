@@ -1,64 +1,64 @@
 {
-  "date": "2026-10-28",
-  "equity": 1432545.0,
+  "date": "2026-10-29",
+  "equity": 1440045.0,
   "cash": 285125.0,
-  "gross_exposure_pct": 80.1,
-  "total_return_pct": -4.5,
+  "gross_exposure_pct": 80.2,
+  "total_return_pct": -4.0,
   "holdings": [
     {
       "ticker": "9434.T",
       "quantity": 1300,
       "avg_cost": 240.01,
-      "price": 230.7,
-      "value": 299910.0,
-      "pnl_pct": -3.88,
-      "weight_pct": 20.9
+      "price": 232.7,
+      "value": 302510.0,
+      "pnl_pct": -3.05,
+      "weight_pct": 21.0
     },
     {
       "ticker": "9432.T",
       "quantity": 1800,
       "avg_cost": 175.79,
-      "price": 171.9,
-      "value": 309420.0,
-      "pnl_pct": -2.21,
-      "weight_pct": 21.6
+      "price": 171.5,
+      "value": 308700.0,
+      "pnl_pct": -2.44,
+      "weight_pct": 21.4
     },
     {
       "ticker": "4005.T",
       "quantity": 200,
       "avg_cost": 558.78,
-      "price": 588.2,
-      "value": 117640.0,
-      "pnl_pct": 5.27,
-      "weight_pct": 8.2
+      "price": 580.8,
+      "value": 116160.0,
+      "pnl_pct": 3.94,
+      "weight_pct": 8.1
     },
     {
       "ticker": "5020.T",
       "quantity": 100,
       "avg_cost": 1441.72,
-      "price": 1429.5,
-      "value": 142950.0,
-      "pnl_pct": -0.85,
+      "price": 1440.5,
+      "value": 144050.0,
+      "pnl_pct": -0.08,
       "weight_pct": 10.0
     },
     {
       "ticker": "8766.T",
       "quantity": 500,
       "avg_cost": 532.95,
-      "price": 555.0,
-      "value": 277500.0,
-      "pnl_pct": 4.14,
-      "weight_pct": 19.4
+      "price": 567.0,
+      "value": 283500.0,
+      "pnl_pct": 6.39,
+      "weight_pct": 19.7
     }
   ],
   "risk": {
-    "annual_return": 0.2582,
-    "annual_volatility": 0.1536,
-    "sharpe": 1.6741,
-    "sortino": 2.5961,
-    "max_drawdown": -0.1255,
-    "var_95": 0.0123,
-    "cvar_95": 0.0185
+    "annual_return": 0.2641,
+    "annual_volatility": 0.1545,
+    "sharpe": 1.7037,
+    "sortino": 2.6431,
+    "max_drawdown": -0.126,
+    "var_95": 0.0124,
+    "cvar_95": 0.0186
   },
   "var_within_limit": true
 }
