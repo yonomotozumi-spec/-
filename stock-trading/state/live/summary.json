@@ -1,62 +1,62 @@
 {
-  "date": "2026-10-29",
-  "equity": 1440045.0,
+  "date": "2026-10-30",
+  "equity": 1446875.0,
   "cash": 285125.0,
-  "gross_exposure_pct": 80.2,
-  "total_return_pct": -4.0,
+  "gross_exposure_pct": 80.3,
+  "total_return_pct": -3.54,
   "holdings": [
     {
       "ticker": "9434.T",
       "quantity": 1300,
       "avg_cost": 240.01,
-      "price": 232.7,
-      "value": 302510.0,
-      "pnl_pct": -3.05,
+      "price": 234.2,
+      "value": 304460.0,
+      "pnl_pct": -2.42,
       "weight_pct": 21.0
     },
     {
       "ticker": "9432.T",
       "quantity": 1800,
       "avg_cost": 175.79,
-      "price": 171.5,
-      "value": 308700.0,
-      "pnl_pct": -2.44,
-      "weight_pct": 21.4
+      "price": 173.3,
+      "value": 311940.0,
+      "pnl_pct": -1.42,
+      "weight_pct": 21.6
     },
     {
       "ticker": "4005.T",
       "quantity": 200,
       "avg_cost": 558.78,
-      "price": 580.8,
-      "value": 116160.0,
-      "pnl_pct": 3.94,
-      "weight_pct": 8.1
+      "price": 565.0,
+      "value": 113000.0,
+      "pnl_pct": 1.11,
+      "weight_pct": 7.8
     },
     {
       "ticker": "5020.T",
       "quantity": 100,
       "avg_cost": 1441.72,
-      "price": 1440.5,
-      "value": 144050.0,
-      "pnl_pct": -0.08,
-      "weight_pct": 10.0
+      "price": 1426.5,
+      "value": 142650.0,
+      "pnl_pct": -1.06,
+      "weight_pct": 9.9
     },
     {
       "ticker": "8766.T",
       "quantity": 500,
       "avg_cost": 532.95,
-      "price": 567.0,
-      "value": 283500.0,
-      "pnl_pct": 6.39,
-      "weight_pct": 19.7
+      "price": 579.4,
+      "value": 289700.0,
+      "pnl_pct": 8.72,
+      "weight_pct": 20.0
     }
   ],
   "risk": {
-    "annual_return": 0.2641,
-    "annual_volatility": 0.1545,
-    "sharpe": 1.7037,
-    "sortino": 2.6431,
-    "max_drawdown": -0.126,
+    "annual_return": 0.2694,
+    "annual_volatility": 0.155,
+    "sharpe": 1.7318,
+    "sortino": 2.6919,
+    "max_drawdown": -0.1259,
     "var_95": 0.0124,
     "cvar_95": 0.0186
   },
