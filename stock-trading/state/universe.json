@@ -1,0 +1,95 @@
+{
+  "as_of": "2026-10-23",
+  "tickers": [
+    "6098.T",
+    "7832.T",
+    "2914.T",
+    "8725.T",
+    "6178.T",
+    "7267.T",
+    "9843.T",
+    "8766.T"
+  ],
+  "details": [
+    {
+      "ticker": "6098.T",
+      "sector": "サービス",
+      "score": 3.0323085466299977,
+      "momentum_120d": 1.6123088812618143,
+      "volatility": 0.5498428475798653,
+      "turnover_avg_jpy": 70164231910.37273,
+      "selected": true,
+      "reason": "mom120 +161.2% / vol 55% / 代金 702億円"
+    },
+    {
+      "ticker": "7832.T",
+      "sector": "ゲーム",
+      "score": 1.9806245393141122,
+      "momentum_120d": 0.7048479848169649,
+      "volatility": 0.3747946334221673,
+      "turnover_avg_jpy": 15637397065.187988,
+      "selected": true,
+      "reason": "mom120 +70.5% / vol 37% / 代金 156億円"
+    },
+    {
+      "ticker": "2914.T",
+      "sector": "食品",
+      "score": 1.4500547014085283,
+      "momentum_120d": 0.3339778642509026,
+      "volatility": 0.2473809867870239,
+      "turnover_avg_jpy": 28704894065.0,
+      "selected": true,
+      "reason": "mom120 +33.4% / vol 25% / 代金 287億円"
+    },
+    {
+      "ticker": "8725.T",
+      "sector": "保険",
+      "score": 1.3969044250482137,
+      "momentum_120d": 0.35959500586740223,
+      "volatility": 0.2772717857401358,
+      "turnover_avg_jpy": 22022854447.409668,
+      "selected": true,
+      "reason": "mom120 +36.0% / vol 28% / 代金 220億円"
+    },
+    {
+      "ticker": "6178.T",
+      "sector": "金融",
+      "score": 1.3649979704453983,
+      "momentum_120d": 0.34850925321518766,
+      "volatility": 0.2755018279535102,
+      "turnover_avg_jpy": 12478745757.196451,
+      "selected": true,
+      "reason": "mom120 +34.9% / vol 28% / 代金 125億円"
+    },
+    {
+      "ticker": "7267.T",
+      "sector": "自動車",
+      "score": 1.3532523041440248,
+      "momentum_120d": 0.4176627264543884,
+      "volatility": 0.33326308283921596,
+      "turnover_avg_jpy": 27005092125.232544,
+      "selected": true,
+      "reason": "mom120 +41.8% / vol 33% / 代金 270億円"
+    },
+    {
+      "ticker": "9843.T",
+      "sector": "小売",
+      "score": 1.278840401514796,
+      "momentum_120d": 0.4900657510764381,
+      "volatility": 0.41571848949756846,
+      "turnover_avg_jpy": 10871359449.735922,
+      "selected": true,
+      "reason": "mom120 +49.0% / vol 42% / 代金 109億円"
+    },
+    {
+      "ticker": "8766.T",
+      "sector": "保険",
+      "score": 1.2502789027383086,
+      "momentum_120d": 0.5510133616527202,
+      "volatility": 0.47902587828134513,
+      "turnover_avg_jpy": 38297097632.119194,
+      "selected": true,
+      "reason": "mom120 +55.1% / vol 48% / 代金 383億円"
+    }
+  ]
+}
