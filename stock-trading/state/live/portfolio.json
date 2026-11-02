@@ -1,5 +1,5 @@
 {
-  "cash": 285124.6499999999,
+  "cash": 387372.6499999999,
   "positions": {
     "9434.T": {
       "ticker": "9434.T",
@@ -12,12 +12,6 @@
       "quantity": 1800,
       "avg_cost": 175.79,
       "peak_price": 180.0
-    },
-    "4005.T": {
-      "ticker": "4005.T",
-      "quantity": 200,
-      "avg_cost": 558.78,
-      "peak_price": 600.5
     },
     "5020.T": {
       "ticker": "5020.T",
@@ -236,10 +230,23 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 1750.37
+    },
+    {
+      "date": "2026-11-02",
+      "ticker": "4005.T",
+      "side": "SELL",
+      "quantity": 200,
+      "price": 511.24,
+      "commission": 0.0,
+      "reason": "損切り: 取得比 -8.5% <= -8%",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 558.78
     }
   ],
   "stop_cooldown": {
     "5401.T": "2026-10-08",
-    "8309.T": "2026-10-23"
+    "8309.T": "2026-10-23",
+    "4005.T": "2026-11-02"
   }
 }
