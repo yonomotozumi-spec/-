@@ -497,7 +497,16 @@ def main() -> None:
         )
 
     gap_tone = "pos" if gap >= 0 else "neg"
-    updated = f"{today.isoformat()} 16:20 JST 更新"
+    # 表示日付はデータの最終取引日。休場日は当日の値が存在しないため、生成日だけを
+    # 出すと「今日は変動ゼロだった」と誤読される。生成日と取引日を区別して出す。
+    sessions = [e["date"].iloc[-1].date()
+                for e in (lv_eq, t1_eq) if e is not None and len(e)]
+    last_session = max(sessions) if sessions else today
+    if last_session < today:
+        updated = (f"{last_session.isoformat()} 終値時点 "
+                   f"(本日 {today.isoformat()} は休場)")
+    else:
+        updated = f"{last_session.isoformat()} 16:20 JST 更新"
     phase = f"ペーパー計測 {t1_days}日目"
 
     html_doc = f"""<title>株自動運用ボード</title>
