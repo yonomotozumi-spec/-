@@ -1,17 +1,11 @@
 {
-  "cash": 26505.85,
+  "cash": 24638.100000000006,
   "positions": {
     "6758.T": {
       "ticker": "6758.T",
       "quantity": 18,
       "avg_cost": 3858.47,
-      "peak_price": 4137.0
-    },
-    "6501.T": {
-      "ticker": "6501.T",
-      "quantity": 11,
-      "avg_cost": 5277.59,
-      "peak_price": 5840.0
+      "peak_price": 4211.0
     },
     "9101.T": {
       "ticker": "9101.T",
@@ -23,7 +17,7 @@
       "ticker": "2914.T",
       "quantity": 15,
       "avg_cost": 6905.16,
-      "peak_price": 7599.0
+      "peak_price": 7769.0
     },
     "9434.T": {
       "ticker": "9434.T",
@@ -39,9 +33,9 @@
     },
     "7832.T": {
       "ticker": "7832.T",
-      "quantity": 1,
-      "avg_cost": 6396.04,
-      "peak_price": 6427.0
+      "quantity": 9,
+      "avg_cost": 6731.888888888889,
+      "peak_price": 6759.0
     }
   },
   "trades": [
@@ -188,10 +182,35 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-11-05",
+      "ticker": "6501.T",
+      "side": "SELL",
+      "quantity": 11,
+      "price": 4761.5,
+      "commission": 26.19,
+      "reason": "損切り: 取得比 -9.6% <= -8%",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 5277.59
+    },
+    {
+      "date": "2026-11-05",
+      "ticker": "7832.T",
+      "side": "BUY",
+      "quantity": 8,
+      "price": 6773.87,
+      "commission": 27.1,
+      "reason": "買いシグナル +0.60 [SMA20/60乖離 +7.6%; 20日リターン +18.3%] | [中立] / 目標配分 16% に対し 8 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 6396.04
     }
   ],
   "stop_cooldown": {
     "7203.T": "2026-10-02",
-    "8309.T": "2026-10-20"
+    "8309.T": "2026-10-20",
+    "6501.T": "2026-11-05"
   }
 }
