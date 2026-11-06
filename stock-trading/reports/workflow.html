@@ -1,0 +1,252 @@
+<title>運用ワークフロー</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@700&display=swap">
+<style>
+:root {
+  --bg:#F4F6F9; --surface:#FFFFFF; --ink:#1B2537; --muted:#5B6578; --muted2:#8A94A8;
+  --border:#DDE2EB; --acc:#3E63DD; --crit:#C43D3D; --chip:#EDF0F7; --good:#1F7A4D;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#12151C; --surface:#1B2029; --ink:#E7EAF2; --muted:#9AA4B8; --muted2:#6B7690;
+    --border:#323949; --acc:#7B96F4; --crit:#E06C6C; --chip:#252B38; --good:#4FBF8B;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#12151C; --surface:#1B2029; --ink:#E7EAF2; --muted:#9AA4B8; --muted2:#6B7690;
+  --border:#323949; --acc:#7B96F4; --crit:#E06C6C; --chip:#252B38; --good:#4FBF8B;
+}
+* { box-sizing:border-box }
+body { background:var(--bg); color:var(--ink); margin:0;
+  font-family:'Noto Sans JP','Hiragino Sans','Yu Gothic',sans-serif; line-height:1.7; }
+.wrap { max-width:1000px; margin:0 auto; padding:32px 20px 64px; }
+h1 { font-family:'Zen Kaku Gothic New',sans-serif; font-size:1.5rem; margin:0 0 4px; }
+h2 { font-family:'Zen Kaku Gothic New',sans-serif; font-size:1.05rem; margin:40px 0 8px; }
+.sub { color:var(--muted); font-size:.85rem; margin:0 0 8px; }
+figure { margin:0; background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:18px; overflow-x:auto; }
+figcaption { color:var(--muted); font-size:.8rem; margin-top:10px; }
+svg { max-width:100%; height:auto; display:block; color:var(--ink); }
+.box { fill:var(--surface); stroke:currentColor; stroke-width:1.3; }
+.boxmute { fill:var(--chip); stroke:var(--muted2); stroke-width:1; }
+.lbl { font-size:12.5px; fill:currentColor; font-family:'Noto Sans JP',sans-serif; }
+.lbl2 { font-size:11px; fill:var(--muted); font-family:'Noto Sans JP',sans-serif; }
+.albl { font-size:11px; fill:var(--muted); font-family:'Noto Sans JP',sans-serif; }
+.lane { font-size:11px; fill:var(--muted2); letter-spacing:.12em; font-family:'Noto Sans JP',sans-serif; }
+table { border-collapse:collapse; width:100%; font-size:.85rem; background:var(--surface);
+  border:1px solid var(--border); border-radius:10px; }
+th { text-align:left; color:var(--muted); font-weight:500; font-size:.75rem;
+  border-bottom:1px solid var(--border); padding:8px 12px; }
+td { padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+tr:last-child td { border-bottom:none }
+.tblwrap { overflow-x:auto }
+ul { margin:8px 0; padding-left:22px; }
+li { margin:4px 0; font-size:.9rem; }
+.note { color:var(--muted); font-size:.8rem; border-top:1px solid var(--border);
+  margin-top:36px; padding-top:12px; }
+code { background:var(--chip); border-radius:4px; padding:1px 6px; font-size:.85em; }
+</style>
+<div class="wrap">
+  <h1>運用ワークフロー</h1>
+  <p class="sub">株自動取引システム — 毎日の運転と、実弾移行までの判断の流れ（2026-08-31時点）</p>
+
+  <h2>① 毎営業日の自動運用サイクル（16:20 JST・東証引け後）</h2>
+  <figure>
+    <svg viewBox="0 0 960 400" role="img" aria-label="毎営業日16:20に定期トリガーがクラウドのClaudeを起こし、GitHub Actionsがデータ取得からペーパー執行までのパイプラインを実行、結果をコミットしてダッシュボード更新と報告につながる。実弾発注はPC上のkabuステーション経由で、移行承認までロックされている。">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+        <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--crit)"/>
+        </marker>
+      </defs>
+
+      <!-- レーン区切り -->
+      <text x="16" y="30" class="lane">クラウド（全自動・稼働中）</text>
+      <line x1="10" y1="288" x2="950" y2="288" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 5"/>
+      <text x="16" y="312" class="lane">あなたのPC（実弾・移行承認後に有効化）</text>
+
+      <!-- 上段: トリガー〜Actions -->
+      <rect x="20" y="48" width="120" height="44" rx="7" class="box"/>
+      <text x="80" y="66" text-anchor="middle" class="lbl">定期トリガー</text>
+      <text x="80" y="82" text-anchor="middle" class="lbl2">平日 16:20 JST</text>
+
+      <line x1="140" y1="70" x2="188" y2="70" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+      <text x="164" y="60" text-anchor="middle" class="albl">起動</text>
+
+      <rect x="190" y="48" width="150" height="44" rx="7" class="box"/>
+      <text x="265" y="66" text-anchor="middle" class="lbl">Claude（全体管理者）</text>
+      <text x="265" y="82" text-anchor="middle" class="lbl2">監視・判断・報告</text>
+
+      <line x1="340" y1="70" x2="398" y2="70" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+      <text x="369" y="60" text-anchor="middle" class="albl">実行指示</text>
+
+      <rect x="400" y="48" width="150" height="44" rx="7" class="box"/>
+      <text x="475" y="66" text-anchor="middle" class="lbl">GitHub Actions</text>
+      <text x="475" y="82" text-anchor="middle" class="lbl2">クラウド実行環境</text>
+
+      <line x1="475" y1="92" x2="475" y2="122" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+
+      <!-- パイプライン -->
+      <rect x="20" y="124" width="920" height="76" rx="9" fill="none" stroke="var(--muted2)" stroke-width="1" stroke-dasharray="4 4"/>
+      <text x="34" y="144" class="lbl2">判断パイプライン（1株トラック・単元株トラックの2系統で毎日実行）</text>
+
+      <rect x="34" y="152" width="128" height="38" rx="6" class="box"/>
+      <text x="98" y="175" text-anchor="middle" class="lbl">市場データ取得</text>
+      <line x1="162" y1="171" x2="186" y2="171" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+
+      <rect x="188" y="152" width="150" height="38" rx="6" class="box"/>
+      <text x="263" y="169" text-anchor="middle" class="lbl">スクリーニング</text>
+      <text x="263" y="184" text-anchor="middle" class="lbl2">118銘柄→8銘柄 / 30日毎</text>
+      <line x1="338" y1="171" x2="362" y2="171" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+
+      <rect x="364" y="152" width="150" height="38" rx="6" class="box"/>
+      <text x="439" y="169" text-anchor="middle" class="lbl">シグナル統合</text>
+      <text x="439" y="184" text-anchor="middle" class="lbl2">モメンタム+平均回帰</text>
+      <line x1="514" y1="171" x2="538" y2="171" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+
+      <rect x="540" y="152" width="176" height="38" rx="6" class="box"/>
+      <text x="628" y="169" text-anchor="middle" class="lbl">リスク管理ゲート</text>
+      <text x="628" y="184" text-anchor="middle" class="lbl2">配分上限・損切り・VaR</text>
+      <line x1="716" y1="171" x2="740" y2="171" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+
+      <rect x="742" y="152" width="184" height="38" rx="6" class="box"/>
+      <text x="834" y="169" text-anchor="middle" class="lbl">ペーパー執行（仮想）</text>
+      <text x="834" y="184" text-anchor="middle" class="lbl2">手数料・スリッページ込み</text>
+
+      <!-- 下流: 保存→ダッシュボード→報告 -->
+      <line x1="834" y1="190" x2="834" y2="222" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+      <text x="866" y="210" class="albl">記録</text>
+
+      <rect x="700" y="224" width="240" height="40" rx="7" class="box"/>
+      <text x="820" y="241" text-anchor="middle" class="lbl">状態コミット（GitHub）</text>
+      <text x="820" y="256" text-anchor="middle" class="lbl2">資産推移・保有・取引履歴</text>
+
+      <line x1="698" y1="244" x2="562" y2="244" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+      <rect x="330" y="224" width="230" height="40" rx="7" class="box"/>
+      <text x="445" y="241" text-anchor="middle" class="lbl">ダッシュボード更新 📈</text>
+      <text x="445" y="256" text-anchor="middle" class="lbl2">実績推移・AS-IS/TO-BE・勝敗</text>
+
+      <line x1="328" y1="244" x2="212" y2="244" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar)"/>
+      <rect x="20" y="224" width="190" height="40" rx="7" class="box"/>
+      <text x="115" y="241" text-anchor="middle" class="lbl">あなたへ報告</text>
+      <text x="115" y="256" text-anchor="middle" class="lbl2">売買発生日・毎週金曜のみ</text>
+
+      <!-- 実弾レーン -->
+      <line x1="628" y1="190" x2="628" y2="330" stroke="var(--crit)" stroke-width="1.3" stroke-dasharray="6 4" marker-end="url(#arA)"/>
+      <text x="638" y="284" class="albl" fill="var(--crit)">実弾発注 🔒 移行承認まで無効</text>
+
+      <rect x="540" y="332" width="176" height="40" rx="7" class="boxmute"/>
+      <text x="628" y="349" text-anchor="middle" class="lbl">kabuステーション</text>
+      <text x="628" y="364" text-anchor="middle" class="lbl2">localhost API（疎通済み✓）</text>
+
+      <line x1="716" y1="352" x2="770" y2="352" stroke="var(--crit)" stroke-width="1.3" stroke-dasharray="6 4" marker-end="url(#arA)"/>
+      <text x="743" y="344" text-anchor="middle" class="albl">SOR成行</text>
+      <rect x="772" y="332" width="120" height="40" rx="7" class="boxmute"/>
+      <text x="832" y="357" text-anchor="middle" class="lbl">東京証券取引所</text>
+    </svg>
+    <figcaption>毎営業日16:20の1サイクル。判断パイプラインは2トラック（1株=戦略の素の実力 / 単元株=実弾と同一条件）で並走し、結果はGitHubに記録されてダッシュボードに反映される。実弾ルート（赤破線）は経路開通済みだが、移行承認まで安全装置でロックされている。</figcaption>
+  </figure>
+
+  <h2>② 実弾移行までの判断ゲート</h2>
+  <figure>
+    <svg viewBox="0 0 940 300" role="img" aria-label="ペーパー計測から始まり、実測Sharpe0.5以上でテスト発注と実弾プランAへ、3ヶ月の実測Sharpe0.8以上で動的レバレッジ1.5倍、1.2以上で上限2倍へ進む。ゲート不通過は計測継続・戦略見直しに戻り、資産が撤退ライン120万円に達したら即時停止する。">
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+        <marker id="arR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--crit)"/>
+        </marker>
+      </defs>
+
+      <!-- 現在地 -->
+      <rect x="20" y="60" width="160" height="52" rx="8" fill="none" stroke="var(--acc)" stroke-width="2.2"/>
+      <text x="100" y="80" text-anchor="middle" class="lbl" fill="var(--acc)">ペーパー計測</text>
+      <text x="100" y="96" text-anchor="middle" class="lbl2">◀ 現在地（2トラック）</text>
+
+      <line x1="180" y1="86" x2="228" y2="86" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar2)"/>
+
+      <!-- ゲート1 -->
+      <rect x="230" y="58" width="164" height="56" rx="8" class="box" stroke-dasharray="5 3"/>
+      <text x="312" y="78" text-anchor="middle" class="lbl">判定① 9月中旬</text>
+      <text x="312" y="94" text-anchor="middle" class="lbl2">15営業日・実測Sharpe ≥ 0.5</text>
+
+      <line x1="394" y1="86" x2="442" y2="86" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar2)"/>
+      <text x="418" y="76" text-anchor="middle" class="albl">合格</text>
+
+      <rect x="444" y="60" width="140" height="52" rx="8" class="box"/>
+      <text x="514" y="80" text-anchor="middle" class="lbl">テスト発注</text>
+      <text x="514" y="96" text-anchor="middle" class="lbl2">1単元・約2.4万円</text>
+
+      <line x1="584" y1="86" x2="632" y2="86" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar2)"/>
+      <text x="608" y="76" text-anchor="middle" class="albl">承認</text>
+
+      <rect x="634" y="60" width="150" height="52" rx="8" class="box"/>
+      <text x="709" y="80" text-anchor="middle" class="lbl">実弾 プランA</text>
+      <text x="709" y="96" text-anchor="middle" class="lbl2">現物150万・自動売買</text>
+
+      <!-- ゲート1不合格ループ -->
+      <line x1="312" y1="114" x2="312" y2="150" stroke="currentColor" stroke-width="1.1" marker-end="url(#ar2)"/>
+      <text x="322" y="136" class="albl">不合格</text>
+      <rect x="222" y="152" width="180" height="40" rx="7" class="boxmute"/>
+      <text x="312" y="169" text-anchor="middle" class="lbl">戦略見直し・計測継続</text>
+      <text x="312" y="184" text-anchor="middle" class="lbl2">パラメタ改善→再判定</text>
+      <polyline points="220,172 100,172 100,114" fill="none" stroke="currentColor" stroke-width="1.1" marker-end="url(#ar2)"/>
+
+      <!-- ゲート2 → レバレッジ -->
+      <line x1="709" y1="112" x2="709" y2="146" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar2)"/>
+      <rect x="622" y="148" width="174" height="56" rx="8" class="box" stroke-dasharray="5 3"/>
+      <text x="709" y="168" text-anchor="middle" class="lbl">判定② 実弾3ヶ月</text>
+      <text x="709" y="184" text-anchor="middle" class="lbl2">Sharpe ≥ 0.8 かつ DD &gt; -15%</text>
+
+      <line x1="709" y1="204" x2="709" y2="234" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar2)"/>
+      <text x="719" y="224" class="albl">合格</text>
+      <rect x="596" y="236" width="226" height="46" rx="8" class="box"/>
+      <text x="709" y="255" text-anchor="middle" class="lbl">動的レバレッジ 上限1.5倍</text>
+      <text x="709" y="271" text-anchor="middle" class="lbl2">撤退ラインとの距離に連動して自動減速</text>
+
+      <line x1="822" y1="259" x2="862" y2="259" stroke="currentColor" stroke-width="1.3" marker-end="url(#ar2)"/>
+      <rect x="864" y="236" width="66" height="46" rx="8" class="box"/>
+      <text x="897" y="255" text-anchor="middle" class="lbl">上限2倍</text>
+      <text x="897" y="271" text-anchor="middle" class="lbl2">Sharpe≥1.2</text>
+
+      <!-- 撤退ライン -->
+      <rect x="20" y="236" width="330" height="46" rx="8" fill="none" stroke="var(--crit)" stroke-width="1.6" stroke-dasharray="7 4"/>
+      <text x="185" y="255" text-anchor="middle" class="lbl" fill="var(--crit)">撤退ライン: 資産120万円（-20%）</text>
+      <text x="185" y="271" text-anchor="middle" class="lbl2">到達で即時 新規買い停止・全面見直し（常時監視）</text>
+      <line x1="352" y1="259" x2="440" y2="259" stroke="var(--crit)" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#arR)"/>
+      <text x="396" y="250" text-anchor="middle" class="albl" fill="var(--crit)">実弾フェーズ全体に適用</text>
+    </svg>
+    <figcaption>実弾とレバレッジは「実測成績が基準を満たしたときだけ」段階的に解禁される。各判定は私が実測データで提案し、最終承認は常にあなた。目標ラダー（165万→220万→300万）は四半期ごとに実測と突き合わせて改定する。</figcaption>
+  </figure>
+
+  <h2>③ 役割分担</h2>
+  <div class="tblwrap"><table>
+    <tr><th style="width:26%">担当</th><th>やること</th><th style="width:30%">頻度</th></tr>
+    <tr><td><b>クラウドClaude</b><br><span class="lbl2">全体管理者</span></td>
+        <td>売買サイクル実行・リスク監視・ダッシュボード更新・実測にもとづく判定提案・障害時の自動修正</td>
+        <td>毎営業日 16:20（全自動）</td></tr>
+    <tr><td><b>あなたのPC</b><br><span class="lbl2">実弾移行後</span></td>
+        <td>kabuステーション起動状態で発注サイクルを実行（タスクスケジューラで自動化）</td>
+        <td>毎営業日 16:20（自動）</td></tr>
+    <tr><td><b>あなた</b></td>
+        <td>①入金・口座手続き ②各判定ゲートの最終承認 ③金曜レポートとダッシュボードの確認（任意）</td>
+        <td>承認時のみ＋週1確認</td></tr>
+  </table></div>
+
+  <h2>④ 多重安全装置（実弾フェーズ）</h2>
+  <ul>
+    <li><b>設定ロック</b>: <code>mode: paper</code> が既定。実弾は設定ファイルの明示変更が必要</li>
+    <li><b>環境変数ロック</b>: <code>KABU_CONFIRM_LIVE=yes</code> がないと発注コードは起動を拒否</li>
+    <li><b>システム側リスク管理</b>: 1銘柄25%上限・株式95%上限・損切り-8%・利確+20%・VaR制限</li>
+    <li><b>証券会社側ソフトリミット</b>: ワンショット上限40万円（誤発注の最終防壁）</li>
+    <li><b>撤退ライン</b>: 資産-20%で新規買い停止・全面見直し（毎日監視・即時警告）</li>
+  </ul>
+
+  <p class="note">
+    関連資料: 目標と判定基準は GOALS.md、移行チェックリストは BROKER_SETUP.md（いずれもリポジトリ内）。
+    日々の実績は<a href="https://claude.ai/code/artifact/deb5899e-058a-4f28-81e4-28574158071e" style="color:var(--acc)">運用ダッシュボード</a>で毎営業日更新。
+    ペーパートレードは仮想売買であり、投資判断は自己責任です。
+  </p>
+</div>
