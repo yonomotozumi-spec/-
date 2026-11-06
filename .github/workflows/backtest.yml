@@ -44,6 +44,11 @@ jobs:
         run: |
           python analysis/universe_compare.py --start "${{ inputs.start || '2023-09-01' }}" \
             --out reports/universe-compare.md | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Audit price series of traded tickers
+        run: |
+          python analysis/price_audit.py \
+            --tickers 2914.T,9101.T,9432.T,5020.T,6501.T,8766.T,9434.T \
+            --days 25 --out reports/price-audit.md | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Commit report
         run: |
           git config user.name "github-actions[bot]"
