@@ -55,4 +55,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports
           git diff --cached --quiet || git commit -m "backtest: 実データバックテスト結果を更新"
-          git push
+          # 実行中にブランチが進むと push が rejected になる (日次サイクルや
+          # ダッシュボード更新と衝突する)。rebase して取り込んでから送る。
+          for i in 1 2 3; do
+            git push && break
+            git pull --rebase origin "$GITHUB_REF_NAME" || exit 1
+          done
