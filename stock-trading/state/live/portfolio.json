@@ -1,5 +1,5 @@
 {
-  "cash": 803374.6499999999,
+  "cash": 664284.6499999999,
   "positions": {
     "9434.T": {
       "ticker": "9434.T",
@@ -12,6 +12,12 @@
       "quantity": 500,
       "avg_cost": 532.948,
       "peak_price": 606.0
+    },
+    "5401.T": {
+      "ticker": "5401.T",
+      "quantity": 200,
+      "avg_cost": 695.45,
+      "peak_price": 695.45
     }
   },
   "trades": [
@@ -254,10 +260,21 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 175.79
+    },
+    {
+      "date": "2026-11-16",
+      "ticker": "5401.T",
+      "side": "BUY",
+      "quantity": 200,
+      "price": 695.45,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.42 [SMA20/60乖離 +0.8%; 20日リターン +8.0%] | [中立] / 目標配分 15% に対し 200 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
     }
   ],
   "stop_cooldown": {
-    "5401.T": "2026-10-08",
     "8309.T": "2026-10-23",
     "4005.T": "2026-11-02",
     "5020.T": "2026-11-05",

@@ -23,13 +23,13 @@
       "ticker": "7832.T",
       "quantity": 11,
       "avg_cost": 6672.647272727272,
-      "peak_price": 6900.0
+      "peak_price": 7066.0
     },
     "8725.T": {
       "ticker": "8725.T",
       "quantity": 11,
       "avg_cost": 4940.85,
-      "peak_price": 5316.0
+      "peak_price": 5329.0
     },
     "7267.T": {
       "ticker": "7267.T",
@@ -41,7 +41,7 @@
       "ticker": "9843.T",
       "quantity": 11,
       "avg_cost": 3267.17,
-      "peak_price": 3427.0
+      "peak_price": 3673.0
     }
   },
   "trades": [
