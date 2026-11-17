@@ -1,5 +1,5 @@
 {
-  "cash": 664284.6499999999,
+  "cash": 594549.6499999999,
   "positions": {
     "9434.T": {
       "ticker": "9434.T",
@@ -15,9 +15,9 @@
     },
     "5401.T": {
       "ticker": "5401.T",
-      "quantity": 200,
-      "avg_cost": 695.45,
-      "peak_price": 695.45
+      "quantity": 300,
+      "avg_cost": 696.0833333333334,
+      "peak_price": 697.0
     }
   },
   "trades": [
@@ -272,6 +272,18 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 0.0
+    },
+    {
+      "date": "2026-11-17",
+      "ticker": "5401.T",
+      "side": "BUY",
+      "quantity": 100,
+      "price": 697.35,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.43 [SMA20/60乖離 +1.1%; 20日リターン +7.1%] | [中立] / 目標配分 15% に対し 100 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 695.45
     }
   ],
   "stop_cooldown": {

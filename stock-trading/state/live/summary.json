@@ -1,46 +1,46 @@
 {
-  "date": "2026-11-16",
-  "equity": 1417645.0,
-  "cash": 664285.0,
-  "gross_exposure_pct": 53.1,
-  "total_return_pct": -5.49,
+  "date": "2026-11-17",
+  "equity": 1413940.0,
+  "cash": 594550.0,
+  "gross_exposure_pct": 58.0,
+  "total_return_pct": -5.74,
   "holdings": [
     {
       "ticker": "9434.T",
       "quantity": 1300,
       "avg_cost": 240.01,
-      "price": 242.8,
-      "value": 315640.0,
-      "pnl_pct": 1.16,
-      "weight_pct": 22.3
+      "price": 244.8,
+      "value": 318240.0,
+      "pnl_pct": 1.99,
+      "weight_pct": 22.5
     },
     {
       "ticker": "8766.T",
       "quantity": 500,
       "avg_cost": 532.95,
-      "price": 597.4,
-      "value": 298700.0,
-      "pnl_pct": 12.09,
-      "weight_pct": 21.1
+      "price": 584.1,
+      "value": 292050.0,
+      "pnl_pct": 9.6,
+      "weight_pct": 20.7
     },
     {
       "ticker": "5401.T",
-      "quantity": 200,
-      "avg_cost": 695.45,
-      "price": 695.1,
-      "value": 139020.0,
-      "pnl_pct": -0.05,
-      "weight_pct": 9.8
+      "quantity": 300,
+      "avg_cost": 696.08,
+      "price": 697.0,
+      "value": 209100.0,
+      "pnl_pct": 0.13,
+      "weight_pct": 14.8
     }
   ],
   "risk": {
-    "annual_return": 0.1419,
-    "annual_volatility": 0.1164,
-    "sharpe": 1.2102,
-    "sortino": 1.9272,
-    "max_drawdown": -0.0902,
-    "var_95": 0.0095,
-    "cvar_95": 0.014
+    "annual_return": 0.1456,
+    "annual_volatility": 0.1231,
+    "sharpe": 1.1744,
+    "sortino": 1.8922,
+    "max_drawdown": -0.0985,
+    "var_95": 0.0101,
+    "cvar_95": 0.0147
   },
   "var_within_limit": true
 }
