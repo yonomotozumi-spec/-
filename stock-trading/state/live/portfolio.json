@@ -1,5 +1,5 @@
 {
-  "cash": 594549.6499999999,
+  "cash": 461933.6499999999,
   "positions": {
     "9434.T": {
       "ticker": "9434.T",
@@ -18,6 +18,12 @@
       "quantity": 300,
       "avg_cost": 696.0833333333334,
       "peak_price": 697.0
+    },
+    "3402.T": {
+      "ticker": "3402.T",
+      "quantity": 100,
+      "avg_cost": 1326.16,
+      "peak_price": 1326.16
     }
   },
   "trades": [
@@ -284,6 +290,18 @@
       "order_id": "",
       "settled": true,
       "prev_avg_cost": 695.45
+    },
+    {
+      "date": "2026-11-18",
+      "ticker": "3402.T",
+      "side": "BUY",
+      "quantity": 100,
+      "price": 1326.16,
+      "commission": 0.0,
+      "reason": "買いシグナル +0.36 [20日リターン +8.9%] | [中立] / 目標配分 10% に対し 100 株",
+      "order_id": "",
+      "settled": true,
+      "prev_avg_cost": 0.0
     }
   ],
   "stop_cooldown": {
