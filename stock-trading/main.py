@@ -155,7 +155,11 @@ def screen(cfg, if_stale: bool) -> None:
             continue
         results.append(sc.evaluate_candidate(cand, data[cand.ticker], cfg.screener))
     selected = sc.select_universe(results, cfg.screener)
-    sc.save_universe(cfg.screener.universe_file, selected)
+    # as_of は「今日」ではなく取得データの最終取引日で刻む。休場日に再選定が
+    # 走ると as_of が非取引日になり、次回の再選定期限が実際の相場から
+    # ずれていく (2026-11-23 の祝日に 1株トラックで発生)。
+    as_of = latest_session_date(data).isoformat()
+    sc.save_universe(cfg.screener.universe_file, selected, as_of=as_of)
 
     print(f"\n=== ユニバース選定結果 ({len(selected)}/{len(results)}銘柄) ===")
     for r in sorted(results, key=lambda r: r.score, reverse=True)[:15]:
